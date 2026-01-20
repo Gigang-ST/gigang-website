@@ -93,13 +93,14 @@ type SiteContent = {
 
 export const siteContent: SiteContent = {
   metadata: {
-    title: "기강단 러닝크루",
-    description: "운동을 좋아하는 사람들이 모여 만든 스포츠 팀. 러닝, 자전거, 수영, 여행을 함께합니다.",
+    title: "기강",
+    description:
+      "운동을 좋아하는 사람들이 모여 만든 스포츠 팀. 러닝, 자전거, 수영, 여행을 함께합니다.",
     generator: "gigang.run",
   },
   brand: {
     shortName: "기강",
-    fullName: "기강단 러닝크루",
+    fullName: "기강",
   },
   navigation: {
     items: [
@@ -112,7 +113,7 @@ export const siteContent: SiteContent = {
     toggleLabel: "메뉴 열기",
   },
   hero: {
-    titleLines: ["기강단", "러닝크루"],
+    titleLines: ["기강"],
     subtitle: "운동을 좋아하는 사람들이 모여 만든 스포츠 팀",
     ctaLabel: "문의하기",
     slideAltPrefix: "기강단 러닝크루 히어로 이미지",
@@ -143,7 +144,8 @@ export const siteContent: SiteContent = {
       {
         id: 1,
         title: "영동2교 집합",
-        description: "영동2교 하부 양재천 남쪽방면에서 준비운동을 하고 출발합니다.",
+        description:
+          "영동2교 하부 양재천 남쪽방면에서 준비운동을 하고 출발합니다.",
         image:
           "https://prod-files-secure.s3.us-west-2.amazonaws.com/3f9c3cb2-230f-4166-8bcb-d730344dc3da/802b99dd-95e3-42ba-a302-35a07e82563f/image.png",
         alt: "영동2교 집합 위치",
@@ -151,7 +153,8 @@ export const siteContent: SiteContent = {
       {
         id: 2,
         title: "영동2교 코스",
-        description: "5K, 8K 코스가 있지만 참여자의 실력에 따라 맞춰 운동합니다.",
+        description:
+          "5K, 8K 코스가 있지만 참여자의 실력에 따라 맞춰 운동합니다.",
         image:
           "https://prod-files-secure.s3.us-west-2.amazonaws.com/3f9c3cb2-230f-4166-8bcb-d730344dc3da/b1d21b43-b3cb-4288-bb3a-9d14868e76e7/image.png",
         alt: "영동2교 코스 안내",
@@ -159,7 +162,8 @@ export const siteContent: SiteContent = {
       {
         id: 3,
         title: "교대 트랙",
-        description: "트랙 훈련을 할 때는 주로 교대에서 진행하며 구령대 남쪽방면에 집합합니다.",
+        description:
+          "트랙 훈련을 할 때는 주로 교대에서 진행하며 구령대 남쪽방면에 집합합니다.",
         image:
           "https://prod-files-secure.s3.us-west-2.amazonaws.com/3f9c3cb2-230f-4166-8bcb-d730344dc3da/a04c4bce-7cd5-4b21-b295-49f8fd88f5ed/image.png",
         alt: "교대 트랙 집합 위치",
@@ -200,7 +204,10 @@ export const siteContent: SiteContent = {
       {
         id: 2,
         title: "나이 제한",
-        details: ["20-35 세 사이 (00년생 ~ 90년생)", "지인 소개 가입은 나이제한 없음"],
+        details: [
+          "20-35 세 사이 (00년생 ~ 90년생)",
+          "지인 소개 가입은 나이제한 없음",
+        ],
       },
       {
         id: 3,
@@ -210,7 +217,9 @@ export const siteContent: SiteContent = {
       {
         id: 4,
         title: "Sport Team 입니다",
-        details: ["런닝, 자전거, 수영, 등산, 트레일런, 클라이밍, 탁구, 배드민턴 외 다수 벙 가능"],
+        details: [
+          "런닝, 자전거, 수영, 등산, 트레일런, 클라이밍, 탁구, 배드민턴 외 다수 벙 가능",
+        ],
       },
       {
         id: 5,

@@ -1,4 +1,5 @@
 import { siteContent } from "@/config"
+import { heroFont } from "@/lib/fonts"
 import { Analytics } from "@vercel/analytics/next"
 import type { Metadata } from "next"
 import "./globals.css"
@@ -32,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={heroFont.variable}>
       <body className={`font-sans antialiased`}>
         {children}
         <Analytics />

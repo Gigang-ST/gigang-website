@@ -1,14 +1,14 @@
 "use client";
 
-import { LiquidButton } from "@/components/ui/liquid-glass-button";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import { HeroTypography } from "@/components/hero-typography";
 import heroLqip from "@/lib/hero-lqip.json";
-import { Menu, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { siteContent } from "@/config";
@@ -40,10 +40,6 @@ export default function HeroSection() {
 
   const navItems = siteContent.navigation.items;
 
-  // Navigation handlers
-  const nextSlide = () => carouselApi?.scrollNext();
-  const prevSlide = () => carouselApi?.scrollPrev();
-
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href);
     if (element) {
@@ -71,6 +67,20 @@ export default function HeroSection() {
     };
   }, [carouselApi]);
 
+  useEffect(() => {
+    if (!carouselApi) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      carouselApi.scrollNext();
+    }, 3000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [carouselApi]);
+
   return (
     <div
       id="hero"
@@ -82,7 +92,7 @@ export default function HeroSection() {
         opts={{ loop: true, align: "start" }}
         setApi={setCarouselApi}
       >
-        <CarouselContent className="w-full">
+        <CarouselContent className="w-full cursor-grab active:cursor-grabbing">
           {slides.map((slide, index) => (
             <CarouselItem
               key={slide.image}
@@ -92,6 +102,7 @@ export default function HeroSection() {
                 src={slide.image}
                 alt={slide.alt}
                 fill
+                draggable={false}
                 priority={index === 0}
                 sizes="100vw"
                 className="object-cover blur-sm scale-105 transition-all duration-1000 ease-in-out"
@@ -108,8 +119,16 @@ export default function HeroSection() {
       {/* Navigation */}
       <nav className="relative z-20 flex items-center justify-between p-6 md:p-8">
         {/* Logo/Brand */}
-        <div className="text-white font-bold text-xl tracking-wider">
-          {siteContent.brand.shortName}
+        <div className="flex items-center gap-3 text-white font-bold text-xl tracking-wider">
+          <Image
+            src="/logo.webp"
+            alt={`${siteContent.brand.shortName} logo`}
+            width={36}
+            height={36}
+            priority
+            className="h-9 w-9 object-contain"
+            sizes="36px"
+          />
         </div>
 
         {/* Desktop Navigation */}
@@ -154,53 +173,41 @@ export default function HeroSection() {
       )}
 
       {/* Hero Content */}
-      <div className="relative z-10 flex h-full items-center justify-center px-6">
+      <div className="absolute inset-0 z-10 flex items-center justify-center px-6 pointer-events-none">
         <div className="text-center text-white max-w-4xl">
           {/* Main Title */}
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-wider mb-4 leading-none">
+          <HeroTypography
+            as="h1"
+            className="text-5xl md:text-7xl lg:text-8xl font-black tracking-wider mb-4 leading-none"
+          >
             {siteContent.hero.titleLines.map((line, index) => (
               <span key={line}>
                 {line}
                 {index < siteContent.hero.titleLines.length - 1 ? <br /> : null}
               </span>
             ))}
-          </h1>
+          </HeroTypography>
 
           {/* Subtitle */}
-          <p className="text-xl md:text-2xl font-light tracking-wide mb-8 text-gray-200">
-            {siteContent.hero.subtitle}
-          </p>
-
-          {/* CTA Button - Now using LiquidButton */}
-          <LiquidButton
-            size="xxl"
-            className="font-semibold text-lg tracking-wide"
-            onClick={() => scrollToSection("#join")}
+          <HeroTypography
+            as="p"
+            className="text-xl md:text-2xl font-light tracking-wide mb-8 text-gray-200"
           >
-            {siteContent.hero.ctaLabel}
-          </LiquidButton>
+            {siteContent.hero.subtitle}
+          </HeroTypography>
         </div>
       </div>
 
       {/* Slider Navigation */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
         <div className="flex items-center space-x-4">
-          {/* Previous Arrow */}
-          <button
-            onClick={prevSlide}
-            className="text-white hover:text-gray-300 transition-colors p-2"
-            aria-label={siteContent.hero.aria.previousSlide}
-          >
-            <ChevronLeft size={24} />
-          </button>
-
           {/* Slide Indicators */}
           <div className="flex space-x-2">
             {slides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => carouselApi?.scrollTo(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                className={`h-2 w-2 rounded-full transition-all duration-300 ${
                   currentSlide === index
                     ? "bg-white"
                     : "bg-white/40 hover:bg-white/60"
@@ -209,15 +216,6 @@ export default function HeroSection() {
               />
             ))}
           </div>
-
-          {/* Next Arrow */}
-          <button
-            onClick={nextSlide}
-            className="text-white hover:text-gray-300 transition-colors p-2"
-            aria-label={siteContent.hero.aria.nextSlide}
-          >
-            <ChevronRight size={24} />
-          </button>
         </div>
       </div>
     </div>
