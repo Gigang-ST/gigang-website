@@ -8,9 +8,10 @@ import {
 } from "@/components/ui/carousel";
 import { HeroTypography } from "@/components/hero-typography";
 import heroLqip from "@/lib/hero-lqip.json";
+import Fade from "embla-carousel-fade";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { siteContent } from "@/config";
 
 const heroLqipMap = heroLqip as Record<string, string>;
@@ -35,6 +36,7 @@ export default function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const fadePlugins = useMemo(() => [Fade()], []);
 
   const slides = baseSlides;
 
@@ -89,8 +91,9 @@ export default function HeroSection() {
       {/* Background Image */}
       <Carousel
         className="absolute inset-0 h-full w-full"
-        opts={{ loop: true, align: "start" }}
+        opts={{ loop: true, align: "start", duration: 30 }}
         setApi={setCarouselApi}
+        plugins={fadePlugins}
       >
         <CarouselContent className="w-full cursor-grab active:cursor-grabbing">
           {slides.map((slide, index) => (
