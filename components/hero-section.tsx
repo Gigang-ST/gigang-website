@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/carousel";
 import { HeroTypography } from "@/components/hero-typography";
 import heroLqip from "@/lib/hero-lqip.json";
+import { bodyFont } from "@/lib/fonts";
 import Fade from "embla-carousel-fade";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
@@ -86,7 +87,7 @@ export default function HeroSection() {
   return (
     <div
       id="hero"
-      className="relative h-screen w-full overflow-hidden bg-black"
+      className={`${bodyFont.className} relative h-screen w-full overflow-hidden bg-black`}
     >
       {/* Background Image */}
       <Carousel
@@ -140,7 +141,7 @@ export default function HeroSection() {
             <button
               key={item.label}
               onClick={() => scrollToSection(item.href)}
-              className="relative text-white hover:text-gray-300 transition-colors duration-300 font-medium tracking-wide pb-1 group"
+              className="relative text-white hover:text-gray-300 transition-colors duration-300 font-normal tracking-wide pb-1 group"
             >
               {item.label}
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 ease-out group-hover:w-full"></span>
@@ -181,7 +182,7 @@ export default function HeroSection() {
           {/* Main Title */}
           <HeroTypography
             as="h1"
-            className="text-5xl md:text-7xl lg:text-8xl font-black tracking-wider mb-4 leading-none"
+            className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-wider mb-4 leading-none"
           >
             {siteContent.hero.titleLines.map((line, index) => (
               <span key={line}>
@@ -194,7 +195,7 @@ export default function HeroSection() {
           {/* Subtitle */}
           <HeroTypography
             as="p"
-            className="text-xl md:text-2xl font-light tracking-wide mb-8 text-gray-200"
+            className="text-xl md:text-2xl font-normal tracking-wide mb-8 text-gray-200"
           >
             {siteContent.hero.subtitle}
           </HeroTypography>

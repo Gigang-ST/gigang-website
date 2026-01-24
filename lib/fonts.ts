@@ -1,8 +1,22 @@
-import { East_Sea_Dokdo } from "next/font/google"
+import localFont from "next/font/local"
 
-export const heroFont = East_Sea_Dokdo({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-hero",
+export const bodyFont = localFont({
+  src: [
+    {
+      path: "../app/fonts/nanum-myeongjo/NanumMyeongjo-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../app/fonts/nanum-myeongjo/NanumMyeongjo-Bold.ttf",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../app/fonts/nanum-myeongjo/NanumMyeongjo-ExtraBold.ttf",
+      weight: "800",
+      style: "normal",
+    },
+  ],
   display: "swap",
 })

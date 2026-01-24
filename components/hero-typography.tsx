@@ -1,6 +1,5 @@
 import type { HTMLAttributes } from "react"
 
-import { heroFont } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
 
 type HeroTypographyProps = HTMLAttributes<HTMLElement> & {
@@ -12,5 +11,5 @@ export function HeroTypography({
   className,
   ...props
 }: HeroTypographyProps) {
-  return <Comp className={cn(heroFont.variable, "font-hero", className)} {...props} />
+  return <Comp className={cn(className)} {...props} />
 }
