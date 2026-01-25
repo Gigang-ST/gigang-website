@@ -1,6 +1,6 @@
 import localFont from "next/font/local"
 
-export const bodyFont = localFont({
+export const NanumMyeongjo = localFont({
   src: [
     {
       path: "../app/fonts/nanum-myeongjo/NanumMyeongjo-Regular.ttf",
@@ -15,6 +15,17 @@ export const bodyFont = localFont({
     {
       path: "../app/fonts/nanum-myeongjo/NanumMyeongjo-ExtraBold.ttf",
       weight: "800",
+      style: "normal",
+    },
+  ],
+  display: "swap",
+})
+
+export const pretendard = localFont({
+  src: [
+    {
+      path: "../app/fonts/pretendard/PretendardVariable.woff2",
+      weight: "100 900",
       style: "normal",
     },
   ],

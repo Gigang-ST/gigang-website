@@ -1,4 +1,5 @@
 import { siteContent } from "@/config"
+import { pretendard } from "@/lib/fonts"
 import { Analytics } from "@vercel/analytics/next"
 import type { Metadata } from "next"
 import "./globals.css"
@@ -33,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className="antialiased">
+      <body className={`${pretendard.className} antialiased`}>
         {children}
         <Analytics />
       </body>

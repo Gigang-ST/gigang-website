@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/carousel";
 import { HeroTypography } from "@/components/hero-typography";
 import heroLqip from "@/lib/hero-lqip.json";
-import { bodyFont } from "@/lib/fonts";
+import { NanumMyeongjo } from "@/lib/fonts";
 import Fade from "embla-carousel-fade";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
@@ -137,7 +137,11 @@ export default function HeroSection({
       {/* Navigation */}
       <nav className="relative z-20 flex items-center justify-between p-6 md:p-8">
         {/* Logo/Brand */}
-        <div className="flex items-center gap-3 text-white font-bold text-xl tracking-wider">
+        <Link
+          href="/"
+          className="flex items-center gap-3 text-white font-bold text-xl tracking-wider"
+          aria-label={`${siteContent.brand.shortName} 홈으로`}
+        >
           <Image
             src="/logo.webp"
             alt={`${siteContent.brand.shortName} logo`}
@@ -147,7 +151,7 @@ export default function HeroSection({
             className="h-9 w-9 object-contain"
             sizes="36px"
           />
-        </div>
+        </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
@@ -268,7 +272,7 @@ export default function HeroSection({
       {showHeroContent ? (
         <div className="absolute inset-0 z-10 flex items-center justify-center px-6 pointer-events-none md:items-start md:justify-start md:px-12 md:pt-36">
           <div
-            className={`${bodyFont.className} text-center text-white max-w-lg md:max-w-[50%] md:text-left`}
+            className={`${NanumMyeongjo.className} text-center text-white max-w-lg md:max-w-[50%] md:text-left`}
           >
             {/* Main Title */}
             <HeroTypography
@@ -278,7 +282,9 @@ export default function HeroSection({
               {siteContent.hero.titleLines.map((line, index) => (
                 <span key={line}>
                   {line}
-                  {index < siteContent.hero.titleLines.length - 1 ? <br /> : null}
+                  {index < siteContent.hero.titleLines.length - 1 ? (
+                    <br />
+                  ) : null}
                 </span>
               ))}
             </HeroTypography>
@@ -286,16 +292,16 @@ export default function HeroSection({
             {/* Subtitle */}
           <HeroTypography
             as="p"
-            className="text-lg md:text-xl font-normal tracking-wide mb-8 text-gray-200"
+            className="text-base md:text-xl font-medium md:font-normal tracking-wide mb-8 text-gray-200"
           >
-            <span>{siteContent.hero.subtitle}</span>
-            {heroSubtitleLines.map((line) => (
-              <span key={line}>
-                <br />
-                {line}
-              </span>
-            ))}
-          </HeroTypography>
+              <span>{siteContent.hero.subtitle}</span>
+              {heroSubtitleLines.map((line) => (
+                <span key={line}>
+                  <br />
+                  {line}
+                </span>
+              ))}
+            </HeroTypography>
           </div>
         </div>
       ) : null}
