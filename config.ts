@@ -52,6 +52,7 @@ type SiteContent = {
   hero: {
     titleLines: string[];
     subtitle: string;
+    subtitleLines?: string[];
     ctaLabel: string;
     slideAltPrefix: string;
     aria: {
@@ -104,17 +105,31 @@ export const siteContent: SiteContent = {
   },
   navigation: {
     items: [
-      { label: "소개", href: "#hero" },
-      { label: "모임장소", href: "#places" },
-      { label: "요청사항", href: "#requests" },
-      { label: "회칙", href: "#rules" },
-      { label: "문의", href: "#contact" },
+      { label: "회칙", href: "/rules" },
+      {
+        label: "기강의전당",
+        href: "https://docs.google.com/spreadsheets/d/11o66AFlb0GMUJ3Das-ERWLkIzk5lV5FdrrIRNEgo5Mg/edit?pli=1&gid=625399337#gid=625399337",
+      },
+      {
+        label: "소모임",
+        href: "https://www.somoim.co.kr/3beed52a-0620-11ef-a71d-0aebcbdc4a071",
+      },
+      { label: "인스타그램", href: "http://www.instagram.com/team_gigang" },
+      { label: "카카오톡", href: "https://open.kakao.com/o/grnMFGng" },
+      {
+        label: "가민 그룹",
+        href: "https://connect.garmin.com/app/group/4857390",
+      },
     ],
     toggleLabel: "메뉴 열기",
   },
   hero: {
     titleLines: ["기강"],
-    subtitle: "운동을 좋아하는 사람들이 모여 만든 스포츠 팀",
+    subtitle: "놀다 보니 강해진다 !",
+    subtitleLines: [
+      "예의는 지키고 땀은 솔직하게, 운동은 같이",
+      "가볍지 않게 오래 가는 기강단",
+    ],
     ctaLabel: "문의하기",
     slideAltPrefix: "기강단 러닝크루 히어로 이미지",
     aria: {
@@ -188,7 +203,7 @@ export const siteContent: SiteContent = {
       {
         id: 3,
         title: "소모임 가입해주세요",
-        href: "https://somoim.friendscube.com/g/3beed52a-0620-11ef-a71d-0aebcbdc4a071",
+        href: "https://www.somoim.co.kr/3beed52a-0620-11ef-a71d-0aebcbdc4a071",
         description: "가입 후 하트도 눌러주세요",
       },
     ],
@@ -205,7 +220,7 @@ export const siteContent: SiteContent = {
         id: 2,
         title: "나이 제한",
         details: [
-          "20-35 세 사이 (00년생 ~ 90년생)",
+          "20 ~ 35 세 사이 (00년생 ~ 90년생)",
           "지인 소개 가입은 나이제한 없음",
         ],
       },
@@ -226,8 +241,12 @@ export const siteContent: SiteContent = {
         title: "회비",
         details: [
           "회비는 월 2천원입니다.",
-          "회비 사용목적: 소모임 프리미엄, 크루 현수막 등 운영비용",
-          "러닝 동기부여, 크루활동 참여독려, 이벤트",
+          "회비 사용목적",
+          "1) 크루 운영비용 (소모임 프리미엄, 크루 현수막 등)",
+          "2) 런닝 동기부여",
+          "3) 크루활동 참여독려",
+          "4) 이벤트",
+          "웬만하면 남기는거없이 그때그때 다 쓰는게 목표입니다.",
           "6천원 이상 미납시 1일 안내 15일 추방될 수 있습니다.",
         ],
       },
