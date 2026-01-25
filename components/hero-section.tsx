@@ -6,6 +6,13 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { HeroTypography } from "@/components/hero-typography";
 import heroLqip from "@/lib/hero-lqip.json";
 import { NanumMyeongjo } from "@/lib/fonts";
@@ -62,7 +69,6 @@ export default function HeroSection({
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
     }
-    setIsMenuOpen(false);
   };
 
   useEffect(() => {
@@ -135,97 +141,30 @@ export default function HeroSection({
       </Carousel>
 
       {/* Navigation */}
-      <nav className="relative z-20 flex items-center justify-between p-6 md:p-8">
-        {/* Logo/Brand */}
-        <Link
-          href="/"
-          className="flex items-center gap-3 text-white font-bold text-xl tracking-wider"
-          aria-label={`${siteContent.brand.shortName} 홈으로`}
-        >
-          <Image
-            src="/logo.webp"
-            alt={`${siteContent.brand.shortName} logo`}
-            width={36}
-            height={36}
-            priority
-            className="h-9 w-9 object-contain"
-            sizes="36px"
-          />
-        </Link>
-
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-8">
-          {navItems.map((item) => {
-            const baseClass =
-              "relative text-white hover:text-gray-300 transition-colors duration-300 font-normal tracking-wide pb-1 group";
-
-            if (isHashLink(item.href)) {
-              return (
-                <button
-                  key={item.label}
-                  onClick={() => scrollToSection(item.href)}
-                  className={baseClass}
-                >
-                  {item.label}
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 ease-out group-hover:w-full"></span>
-                </button>
-              );
-            }
-
-            if (isExternalLink(item.href)) {
-              return (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={baseClass}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.label}
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 ease-out group-hover:w-full"></span>
-                </a>
-              );
-            }
-
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={baseClass}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item.label}
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 ease-out group-hover:w-full"></span>
-              </Link>
-            );
-          })}
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          className="md:hidden text-white hover:text-gray-300 transition-colors"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          <span className="sr-only">{siteContent.navigation.toggleLabel}</span>
-        </button>
-      </nav>
-
-      {/* Mobile Navigation Menu */}
-      {isMenuOpen && (
-        <div className="absolute top-0 left-0 w-full h-full bg-black/90 z-30 md:hidden">
-          <button
-            className="absolute right-6 top-6 text-white hover:text-gray-300 transition-colors"
-            onClick={() => setIsMenuOpen(false)}
-            aria-label="메뉴 닫기"
+      <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+        <nav className="relative z-20 flex items-center justify-between p-6 md:p-8">
+          {/* Logo/Brand */}
+          <Link
+            href="/"
+            className="flex items-center gap-3 text-white font-bold text-xl tracking-wider"
+            aria-label={`${siteContent.brand.shortName} 홈으로`}
           >
-            <X size={28} />
-          </button>
-          <div className="flex flex-col items-center justify-center h-full space-y-8">
+            <Image
+              src="/logo.webp"
+              alt={`${siteContent.brand.shortName} logo`}
+              width={36}
+              height={36}
+              priority
+              className="h-9 w-9 object-contain"
+              sizes="36px"
+            />
+          </Link>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => {
               const baseClass =
-                "text-white text-2xl font-bold tracking-wider hover:text-gray-300 transition-colors duration-300";
+                "relative text-white hover:text-gray-300 transition-colors duration-300 font-normal tracking-wide pb-1 group";
 
               if (isHashLink(item.href)) {
                 return (
@@ -235,6 +174,7 @@ export default function HeroSection({
                     className={baseClass}
                   >
                     {item.label}
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 ease-out group-hover:w-full"></span>
                   </button>
                 );
               }
@@ -247,9 +187,9 @@ export default function HeroSection({
                     target="_blank"
                     rel="noreferrer"
                     className={baseClass}
-                    onClick={() => setIsMenuOpen(false)}
                   >
                     {item.label}
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 ease-out group-hover:w-full"></span>
                   </a>
                 );
               }
@@ -259,15 +199,75 @@ export default function HeroSection({
                   key={item.label}
                   href={item.href}
                   className={baseClass}
-                  onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 ease-out group-hover:w-full"></span>
                 </Link>
               );
             })}
           </div>
-        </div>
-      )}
+
+          {/* Mobile Menu Button */}
+          <SheetTrigger asChild>
+            <button className="md:hidden text-white hover:text-gray-300 transition-colors">
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              <span className="sr-only">
+                {siteContent.navigation.toggleLabel}
+              </span>
+            </button>
+          </SheetTrigger>
+        </nav>
+
+        <SheetContent
+          side="right"
+          className="w-full border-none bg-black/95 p-0 text-white sm:max-w-none"
+        >
+          <SheetTitle className="sr-only">모바일 메뉴</SheetTitle>
+          <div className="relative flex h-full flex-col items-center justify-center gap-8 px-6 py-10">
+            {navItems.map((item) => {
+              const baseClass =
+                "text-white text-2xl font-bold tracking-wider hover:text-gray-300 transition-colors duration-300";
+
+              if (isHashLink(item.href)) {
+                return (
+                  <SheetClose asChild key={item.label}>
+                    <button
+                      type="button"
+                      onClick={() => scrollToSection(item.href)}
+                      className={baseClass}
+                    >
+                      {item.label}
+                    </button>
+                  </SheetClose>
+                );
+              }
+
+              if (isExternalLink(item.href)) {
+                return (
+                  <SheetClose asChild key={item.label}>
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={baseClass}
+                    >
+                      {item.label}
+                    </a>
+                  </SheetClose>
+                );
+              }
+
+              return (
+                <SheetClose asChild key={item.label}>
+                  <Link href={item.href} className={baseClass}>
+                    {item.label}
+                  </Link>
+                </SheetClose>
+              );
+            })}
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {showHeroContent ? (
         <div className="absolute inset-0 z-10 flex items-center justify-center px-6 pointer-events-none md:items-start md:justify-start md:px-12 md:pt-36">
