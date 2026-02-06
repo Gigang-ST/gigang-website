@@ -105,6 +105,7 @@ export const siteContent: SiteContent = {
   },
   navigation: {
     items: [
+      { label: "가입안내", href: "/join" },
       { label: "회칙", href: "/rules" },
       {
         label: "기강의전당",
