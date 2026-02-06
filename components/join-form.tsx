@@ -13,7 +13,7 @@ const PRIVACY_TEXT = `개인정보 수집 및 이용 동의서
 기강(이하 "크루")은 가입 신청 및 원활한 크루 운영을 위해 아래와 같이 개인정보를 수집·이용합니다.
 
 1. 수집 항목
-   - 필수: 이름, 생년월일, 거주지역(가까운 지하철역)
+   - 필수: 이름, 성별, 생년월일, 거주지역(가까운 지하철역)
    - 선택: 연락처, 계좌번호, 러닝경력
 
 2. 수집 목적
@@ -66,6 +66,7 @@ export default function JoinForm() {
   const [loading, setLoading] = useState(false);
 
   const [name, setName] = useState("");
+  const [gender, setGender] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [birthDateError, setBirthDateError] = useState<string | null>(null);
   const [nearestStation, setNearestStation] = useState("");
@@ -86,6 +87,7 @@ export default function JoinForm() {
 
   const isValid =
     name &&
+    gender &&
     birthDate &&
     !birthDateError &&
     nearestStation &&
@@ -101,6 +103,7 @@ export default function JoinForm() {
     const payload = {
       timestamp: new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }),
       name,
+      gender,
       birthDate,
       nearestStation,
       instagramFollow,
@@ -116,7 +119,6 @@ export default function JoinForm() {
         await fetch(scriptUrl, {
           method: "POST",
           mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
       }
@@ -178,6 +180,32 @@ export default function JoinForm() {
             required
             className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
           />
+        </div>
+
+        <div className="space-y-3">
+          <Label>성별 *</Label>
+          <RadioGroup value={gender} onValueChange={setGender}>
+            <div className="flex items-center gap-2">
+              <RadioGroupItem
+                value="남"
+                id="gender-male"
+                className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
+              />
+              <Label htmlFor="gender-male" className="font-normal">
+                남
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <RadioGroupItem
+                value="여"
+                id="gender-female"
+                className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
+              />
+              <Label htmlFor="gender-female" className="font-normal">
+                여
+              </Label>
+            </div>
+          </RadioGroup>
         </div>
 
         <div className="space-y-2">
