@@ -1,5 +1,5 @@
 // ============================================
-// Google Apps Script - 기강 가입신청서
+// Google Apps Script - 기강 가입신청서 + 대회참여
 // ============================================
 //
 // 설정 방법:
@@ -11,15 +11,18 @@
 // 3. 첫 번째 행(헤더)에 아래 순서대로 입력:
 //    | 제출시간 | 이름 | 성별 | 생년월일 | 지하철역 | 인스타팔로우 | 러닝경력 | 연락처 | 계좌번호 | 개인정보동의 |
 //
-// 4. 확장 프로그램 → Apps Script 열기
+// 4. "대회참여현황" 시트 헤더:
+//    | 작성일 | 대회 | 코스 | 이름 | 각오 |
 //
-// 5. 아래 코드 전체를 복사해서 붙여넣기 → 저장
+// 5. 확장 프로그램 → Apps Script 열기
 //
-// 6. 배포 → 새 배포 → 웹 앱
+// 6. 아래 코드 전체를 복사해서 붙여넣기 → 저장
+//
+// 7. 배포 → 새 배포 → 웹 앱 (기존 배포 업데이트도 가능)
 //    - 실행 계정: 나
 //    - 액세스: 모든 사용자
 //
-// 7. 배포 URL 복사 → Vercel 환경변수에 설정
+// 8. 배포 URL 복사 → Vercel 환경변수에 설정
 //    NEXT_PUBLIC_GOOGLE_SCRIPT_URL=복사한_URL
 //
 // ============================================
@@ -29,21 +32,34 @@
 
 function doPost(e) {
   var ss = SpreadsheetApp.openById("16Z3GOjYhPLx4UYxg5B-BeQ_LHmtDX7xP4_VwgDsASIw");
-  var sheet = ss.getSheetByName("가입신청서");
   var data = JSON.parse(e.postData.contents);
 
-  sheet.appendRow([
-    data.timestamp,
-    data.name,
-    data.gender,
-    data.birthDate,
-    data.nearestStation,
-    data.instagramFollow,
-    data.runningExperience,
-    data.phone,
-    data.bankAccount,
-    data.privacyAgreed
-  ]);
+  if (data.action === "raceParticipation") {
+    // 대회 참가 신청
+    var sheet = ss.getSheetByName("대회참여현황");
+    sheet.appendRow([
+      data.registeredDate,
+      data.raceName,
+      data.course,
+      data.memberName,
+      data.resolution || ""
+    ]);
+  } else {
+    // 기존 가입신청서 로직 (하위 호환)
+    var sheet = ss.getSheetByName("가입신청서");
+    sheet.appendRow([
+      data.timestamp,
+      data.name,
+      data.gender,
+      data.birthDate,
+      data.nearestStation,
+      data.instagramFollow,
+      data.runningExperience,
+      data.phone,
+      data.bankAccount,
+      data.privacyAgreed
+    ]);
+  }
 
   return ContentService.createTextOutput(JSON.stringify({ result: "OK" }))
     .setMimeType(ContentService.MimeType.JSON);
@@ -67,7 +83,22 @@ function testDoPost() {
       })
     }
   };
+  doPost(fakeEvent);
+}
 
+function testRaceParticipation() {
+  var fakeEvent = {
+    postData: {
+      contents: JSON.stringify({
+        action: "raceParticipation",
+        registeredDate: "2026. 2. 8",
+        raceName: "고구려마라톤",
+        course: "마라톤-FULL",
+        memberName: "테스트",
+        resolution: "서브3!"
+      })
+    }
+  };
   doPost(fakeEvent);
 }
 

@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { validateBirthDate } from "@/lib/validation";
 
 const PRIVACY_TEXT = `개인정보 수집 및 이용 동의서
 
@@ -26,40 +27,6 @@ const PRIVACY_TEXT = `개인정보 수집 및 이용 동의서
 
 4. 동의 거부 권리
    - 개인정보 수집·이용에 동의하지 않을 권리가 있으나, 필수 항목 미동의 시 가입이 제한될 수 있습니다.`;
-
-function validateBirthDate(value: string): string | null {
-  if (!value) return null;
-  const trimmed = value.trim();
-
-  // YYMMDD (6자리)
-  if (/^\d{6}$/.test(trimmed)) {
-    const yy = parseInt(trimmed.slice(0, 2), 10);
-    const mm = parseInt(trimmed.slice(2, 4), 10);
-    const dd = parseInt(trimmed.slice(4, 6), 10);
-    if (mm < 1 || mm > 12) return "월은 01~12 사이여야 합니다.";
-    if (dd < 1 || dd > 31) return "일은 01~31 사이여야 합니다.";
-    const year = yy >= 0 && yy <= 30 ? 2000 + yy : 1900 + yy;
-    const date = new Date(year, mm - 1, dd);
-    if (date.getMonth() !== mm - 1 || date.getDate() !== dd)
-      return "유효하지 않은 날짜입니다.";
-    return null;
-  }
-
-  // YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
-    const [yyyy, mm, dd] = trimmed.split("-").map(Number);
-    if (yyyy < 1900 || yyyy > new Date().getFullYear())
-      return "연도를 확인해주세요.";
-    if (mm < 1 || mm > 12) return "월은 01~12 사이여야 합니다.";
-    if (dd < 1 || dd > 31) return "일은 01~31 사이여야 합니다.";
-    const date = new Date(yyyy, mm - 1, dd);
-    if (date.getMonth() !== mm - 1 || date.getDate() !== dd)
-      return "유효하지 않은 날짜입니다.";
-    return null;
-  }
-
-  return "형식: 1995-03-15 또는 950315";
-}
 
 export default function JoinForm() {
   const [submitted, setSubmitted] = useState(false);
@@ -115,13 +82,14 @@ export default function JoinForm() {
 
     try {
       const scriptUrl = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL;
-      if (scriptUrl) {
-        await fetch(scriptUrl, {
-          method: "POST",
-          mode: "no-cors",
-          body: JSON.stringify(payload),
-        });
+      if (!scriptUrl) {
+        throw new Error("Google Script URL이 설정되지 않았습니다.");
       }
+      await fetch(scriptUrl, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(payload),
+      });
       setSubmitted(true);
     } catch {
       alert("제출 중 오류가 발생했습니다. 다시 시도해주세요.");
