@@ -10,6 +10,7 @@
 - **Language**: TypeScript
 - **Deployment**: Vercel
 - **Analytics**: Vercel Analytics
+- **Data**: Google Sheets (CSV export) + Google Apps Script
 
 ## 시작하기
 
@@ -34,17 +35,22 @@ app/
 ├── page.tsx            # 메인 페이지 (/)
 ├── rules/page.tsx      # 회칙 페이지 (/rules)
 ├── join/page.tsx       # 가입안내 페이지 (/join)
+├── races/page.tsx      # 대회참여 페이지 (/races)
 ├── fonts/              # 로컬 폰트 (나눔명조, Pretendard)
 └── globals.css         # 글로벌 스타일
 
 components/
-├── hero-section.tsx    # 히어로 섹션 (캐러셀 + 네비게이션)
-├── hero-typography.tsx # 히어로 타이포그래피
-├── join-form.tsx       # 가입 신청 폼 + 환영 메시지
-└── ui/                 # shadcn/ui 컴포넌트
+├── hero-section.tsx        # 히어로 섹션 (캐러셀 + 네비게이션)
+├── hero-typography.tsx     # 히어로 타이포그래피
+├── join-form.tsx           # 가입 신청 폼 + 환영 메시지
+├── race-card.tsx           # 대회 카드 (코스별 참가자 표시)
+├── race-participation.tsx  # 대회참여 메인 컴포넌트
+├── race-signup-dialog.tsx  # 참가 신청 다이얼로그
+└── ui/                     # shadcn/ui 컴포넌트
     ├── button.tsx
     ├── carousel.tsx
     ├── checkbox.tsx
+    ├── dialog.tsx
     ├── input.tsx
     ├── label.tsx
     ├── radio-group.tsx
@@ -53,9 +59,19 @@ components/
 
 config.ts               # 사이트 콘텐츠 및 네비게이션 설정
 lib/
+├── csv.ts              # CSV 파서 (따옴표 필드 처리)
 ├── fonts.ts            # 폰트 설정
+├── hero-lqip.json      # 히어로 이미지 블러 플레이스홀더
+├── sheets.ts           # Google Sheets CSV fetch 헬퍼
+├── types.ts            # 타입 정의
 ├── utils.ts            # 유틸리티 (cn 헬퍼)
-└── hero-lqip.json      # 히어로 이미지 블러 플레이스홀더
+└── validation.ts       # 생년월일 검증 및 정규화
+
+google-apps-script/
+└── Code.js             # Apps Script (가입신청서 + 대회참여)
+
+scripts/
+└── fetch-sheet.mjs     # Google Sheets 시트 조회 스크립트
 ```
 
 ## 페이지
@@ -65,6 +81,27 @@ lib/
 | `/` | 메인 페이지 (히어로 캐러셀, 크루 소개) |
 | `/rules` | 회칙 페이지 |
 | `/join` | 가입안내 페이지 (폼 제출 → Google Sheets 저장) |
+| `/races` | 대회참여 페이지 (대회 목록, 참가 신청) |
+
+## 대회참여 페이지 (/races)
+
+Google Sheets에서 4개 시트를 CSV로 읽어와 대회 참여 현황을 표시합니다.
+
+### 사용하는 시트
+
+| 시트 | gid | 용도 |
+|------|-----|------|
+| 대회현황 | 267782969 | 대회 목록 (날짜, 대회명, 구분, 코스) |
+| 대회참여현황 | 573958893 | 참가 신청 내역 (대회, 코스, 이름) |
+| 가입신청서 | 0 | 회원 명부 (본인확인용) |
+| 대회기록 | 1638315503 | 완주 기록 (이름, 대회, 코스, 기록) |
+
+### 기능
+
+- **다가오는 대회**: 날짜 오름차순, 참가 신청 가능
+- **최근 대회**: 지난 60일, 완주 기록 표시
+- **참가 신청**: 본인확인(이름+생년월일) → 코스 선택 → Google Sheets에 저장
+- **중복 신청**: 같은 대회에 다시 신청하면 마지막 신청 기준으로 표시
 
 ## 가입안내 페이지 (/join)
 
@@ -72,6 +109,7 @@ lib/
 
 **필수 항목**
 - 이름 (텍스트)
+- 성별 (라디오 버튼)
 - 생년월일 (텍스트, `YYYY-MM-DD` 또는 `YYMMDD` 형식 검증)
 - 사는곳 - 가까운 지하철역 (텍스트)
 - 인스타 팔로우 여부 (라디오 버튼)
@@ -82,45 +120,10 @@ lib/
 - 계좌번호 (텍스트)
 - 개인정보 수집동의 (체크박스, 필수)
 
-### Google Sheets 연동
+## Google Sheets 연동
 
 제출된 데이터는 Google Apps Script를 통해 Google Sheets에 자동 저장됩니다.
-
-**설정 방법**
-
-1. [Google Sheets](https://docs.google.com/spreadsheets/d/16Z3GOjYhPLx4UYxg5B-BeQ_LHmtDX7xP4_VwgDsASIw) 열기
-2. 확장 프로그램 → Apps Script
-3. 아래 코드 붙여넣기 → 저장:
-
-```javascript
-function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data = JSON.parse(e.postData.contents);
-
-  sheet.appendRow([
-    data.timestamp,
-    data.name,
-    data.birthDate,
-    data.nearestStation,
-    data.instagramFollow,
-    data.runningExperience,
-    data.phone,
-    data.bankAccount,
-    data.privacyAgreed
-  ]);
-
-  return ContentService.createTextOutput("OK");
-}
-```
-
-4. 배포 → 새 배포 → 웹 앱
-   - 실행 계정: 나
-   - 액세스: 모든 사용자
-5. 배포 URL 복사
-
-**시트 헤더 (첫 번째 행)**
-
-| 제출시간 | 이름 | 생년월일 | 지하철역 | 인스타팔로우 | 러닝경력 | 연락처 | 계좌번호 | 개인정보동의 |
+Apps Script 코드는 `google-apps-script/Code.js`에 있습니다.
 
 ### 환경변수
 
