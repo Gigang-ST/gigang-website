@@ -1,0 +1,27 @@
+# 의존성
+node_modules/
+
+# 빌드 산출물
+.next/
+out/
+build/
+
+# 락파일
+pnpm-lock.yaml
+
+# 생성 파일
+lib/hero-lqip.json
+
+# 폰트 바이너리
+app/fonts/
+
+# shadcn/ui 생성 컴포넌트
+components/ui/
+
+# 히어로 이미지
+public/images/hero/
+
+# 아이콘 에셋
+public/icon*.png
+public/android-icon-*.png
+public/apple-icon-*.png
