@@ -7,15 +7,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { validateBirthDate } from "@/lib/validation";
+import { validateBirthDate, normalizeBirthDate } from "@/lib/validation";
 
 const PRIVACY_TEXT = `개인정보 수집 및 이용 동의서
 
 기강(이하 "크루")은 가입 신청 및 원활한 크루 운영을 위해 아래와 같이 개인정보를 수집·이용합니다.
 
 1. 수집 항목
-   - 필수: 이름, 성별, 생년월일, 거주지역(가까운 지하철역)
-   - 선택: 연락처, 계좌번호, 러닝경력
+   - 필수: 이름, 성별, 생년월일
+   - 선택: 거주지역, 러닝경력, 연락처, 계좌번호
 
 2. 수집 목적
    - 크루 가입 신청 및 자격 확인
@@ -37,7 +37,6 @@ export default function JoinForm() {
   const [birthDate, setBirthDate] = useState("");
   const [birthDateError, setBirthDateError] = useState<string | null>(null);
   const [nearestStation, setNearestStation] = useState("");
-  const [instagramFollow, setInstagramFollow] = useState("");
   const [runningExperience, setRunningExperience] = useState("");
   const [phone, setPhone] = useState("");
   const [bankAccount, setBankAccount] = useState("");
@@ -57,8 +56,6 @@ export default function JoinForm() {
     gender &&
     birthDate &&
     !birthDateError &&
-    nearestStation &&
-    instagramFollow &&
     privacyAgreed;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,17 +64,22 @@ export default function JoinForm() {
 
     setLoading(true);
 
+    const norm = normalizeBirthDate(birthDate);
+    const formattedBirth = `${norm.slice(0, 4)}-${norm.slice(4, 6)}-${norm.slice(6, 8)}`;
+
+    const noteParts = [
+      nearestStation && `거주지역: ${nearestStation}`,
+      runningExperience && `러닝경력: ${runningExperience}`,
+    ].filter(Boolean);
+
     const payload = {
-      timestamp: new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }),
+      action: "join",
       name,
       gender,
-      birthDate,
-      nearestStation,
-      instagramFollow,
-      runningExperience: runningExperience || "",
+      birthDate: formattedBirth,
       phone: phone || "",
-      bankAccount: bankAccount || "",
-      privacyAgreed: privacyAgreed ? "동의" : "미동의",
+      accountNumber: bankAccount || "",
+      note: noteParts.join(", "),
     };
 
     try {
@@ -155,7 +157,7 @@ export default function JoinForm() {
           <RadioGroup value={gender} onValueChange={setGender}>
             <div className="flex items-center gap-2">
               <RadioGroupItem
-                value="남"
+                value="male"
                 id="gender-male"
                 className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
               />
@@ -165,7 +167,7 @@ export default function JoinForm() {
             </div>
             <div className="flex items-center gap-2">
               <RadioGroupItem
-                value="여"
+                value="female"
                 id="gender-female"
                 className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
               />
@@ -192,51 +194,22 @@ export default function JoinForm() {
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="nearestStation">사는곳 (가까운 지하철역) *</Label>
-          <Input
-            id="nearestStation"
-            placeholder="가까운 지하철역"
-            value={nearestStation}
-            onChange={(e) => setNearestStation(e.target.value)}
-            required
-            className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
-          />
-        </div>
-
-        <div className="space-y-3">
-          <Label>인스타 팔로우 *</Label>
-          <RadioGroup
-            value={instagramFollow}
-            onValueChange={setInstagramFollow}
-          >
-            <div className="flex items-center gap-2">
-              <RadioGroupItem
-                value="Yes"
-                id="insta-yes"
-                className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
-              />
-              <Label htmlFor="insta-yes" className="font-normal">
-                Yes
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <RadioGroupItem
-                value="나는 인스타가 없다"
-                id="insta-no"
-                className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
-              />
-              <Label htmlFor="insta-no" className="font-normal">
-                나는 인스타가 없다
-              </Label>
-            </div>
-          </RadioGroup>
-        </div>
       </fieldset>
 
       {/* 선택 항목 */}
       <fieldset className="space-y-5">
         <legend className="text-lg font-semibold">선택 항목</legend>
+
+        <div className="space-y-2">
+          <Label htmlFor="nearestStation">사는곳 (가까운 지하철역)</Label>
+          <Input
+            id="nearestStation"
+            placeholder="가까운 지하철역"
+            value={nearestStation}
+            onChange={(e) => setNearestStation(e.target.value)}
+            className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
+          />
+        </div>
 
         <div className="space-y-3">
           <Label>러닝경력</Label>

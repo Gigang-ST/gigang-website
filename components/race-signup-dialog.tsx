@@ -37,6 +37,7 @@ export default function RaceSignupDialog({
   const [birthDate, setBirthDate] = useState("");
   const [birthDateError, setBirthDateError] = useState<string | null>(null);
   const [verifyError, setVerifyError] = useState("");
+  const [verifiedMemberId, setVerifiedMemberId] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
   const [resolution, setResolution] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -47,6 +48,7 @@ export default function RaceSignupDialog({
     setBirthDate("");
     setBirthDateError(null);
     setVerifyError("");
+    setVerifiedMemberId("");
     setSelectedCourse("");
     setResolution("");
     setSubmitting(false);
@@ -80,21 +82,21 @@ export default function RaceSignupDialog({
       setVerifyError("등록된 회원 정보와 일치하지 않습니다. 이름과 생년월일을 확인해주세요.");
       return;
     }
-    if (found.isWithdrawn) {
+    if (found.status !== "active") {
       setVerifyError("탈퇴한 회원입니다. 문의사항은 운영진에게 연락해주세요.");
       return;
     }
 
     setVerifyError("");
+    setVerifiedMemberId(found.memberId);
     setStep("course");
   }, [name, birthDate, birthDateError, members]);
 
   // 코스 목록 구성
-  const courseOptions = race.courses.slice();
-  const extraCourses = [`${race.category}-미정`, `${race.category}-응원`];
-  for (const ec of extraCourses) {
-    if (!courseOptions.includes(ec)) {
-      courseOptions.push(ec);
+  const courseOptions = race.courses.map((c) => c.competitionClass);
+  for (const extra of ["미정", "응원"]) {
+    if (!courseOptions.includes(extra)) {
+      courseOptions.push(extra);
     }
   }
 
@@ -108,16 +110,18 @@ export default function RaceSignupDialog({
     if (!selectedCourse) return;
     setSubmitting(true);
 
-    const now = new Date();
-    const registeredDate = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}`;
+    const matchedCourse = race.courses.find(
+      (c) => c.competitionClass === selectedCourse,
+    );
 
     const payload = {
       action: "raceParticipation",
-      registeredDate,
-      raceName: race.name,
-      course: selectedCourse,
+      memberId: verifiedMemberId,
       memberName: name.trim(),
-      resolution: resolution.trim(),
+      competitionId: matchedCourse?.competitionId || "",
+      competitionName: race.name,
+      competitionClass: selectedCourse,
+      pledge: resolution.trim(),
     };
 
     try {
@@ -132,11 +136,13 @@ export default function RaceSignupDialog({
 
       // 낙관적 업데이트
       onSubmitted({
-        registeredDate,
-        raceName: race.name,
-        course: selectedCourse,
+        memberId: verifiedMemberId,
         memberName: name.trim(),
-        resolution: resolution.trim(),
+        competitionId: matchedCourse?.competitionId || "",
+        competitionName: race.name,
+        competitionClass: selectedCourse,
+        status: selectedCourse === "응원" ? "cheering" : "applied",
+        pledge: resolution.trim(),
       });
 
       setStep("done");
@@ -146,7 +152,7 @@ export default function RaceSignupDialog({
     } finally {
       setSubmitting(false);
     }
-  }, [selectedCourse, name, resolution, race.name, onSubmitted]);
+  }, [selectedCourse, name, resolution, race.name, race.courses, verifiedMemberId, onSubmitted]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -154,7 +160,7 @@ export default function RaceSignupDialog({
         <DialogHeader>
           <DialogTitle>참가 신청 — {race.name}</DialogTitle>
           <DialogDescription>
-            {race.date} · {race.category}
+            {race.date}
           </DialogDescription>
         </DialogHeader>
 
@@ -215,27 +221,24 @@ export default function RaceSignupDialog({
 
             {existingEntry && (
               <p className="rounded bg-yellow-900/30 border border-yellow-700/30 px-3 py-2 text-sm text-yellow-300">
-                이미 <strong>{existingEntry.course.split("-").pop()}</strong>(으)로 신청되어 있습니다.
+                이미 <strong>{existingEntry.competitionClass}</strong>(으)로 신청되어 있습니다.
                 다시 신청하면 마지막 신청으로 변경됩니다.
               </p>
             )}
 
             <RadioGroup value={selectedCourse} onValueChange={setSelectedCourse}>
-              {courseOptions.map((course) => {
-                const label = course.split("-").slice(1).join("-") || course;
-                return (
-                  <div key={course} className="flex items-center gap-2">
-                    <RadioGroupItem
-                      value={course}
-                      id={`course-${course}`}
-                      className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
-                    />
-                    <Label htmlFor={`course-${course}`} className="font-normal text-white/80">
-                      {label}
-                    </Label>
-                  </div>
-                );
-              })}
+              {courseOptions.map((course) => (
+                <div key={course} className="flex items-center gap-2">
+                  <RadioGroupItem
+                    value={course}
+                    id={`course-${course}`}
+                    className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
+                  />
+                  <Label htmlFor={`course-${course}`} className="font-normal text-white/80">
+                    {course}
+                  </Label>
+                </div>
+              ))}
             </RadioGroup>
 
             <div className="space-y-2">
@@ -265,7 +268,7 @@ export default function RaceSignupDialog({
           <div className="space-y-4 text-center">
             <p className="text-lg font-semibold text-white">신청 완료!</p>
             <p className="text-sm text-white/60">
-              {race.name} — {selectedCourse.split("-").pop()} 코스로 신청되었습니다.
+              {race.name} — {selectedCourse} 코스로 신청되었습니다.
             </p>
             <Button
               onClick={() => handleOpenChange(false)}
