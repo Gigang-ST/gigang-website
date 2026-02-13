@@ -1,11 +1,18 @@
 "use client";
 
-import type { Race, RaceParticipant, RaceRecord } from "@/lib/types";
+import type { Race, RaceParticipant } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 
+const TYPE_LABELS: Record<string, string> = {
+  road_run: "로드런",
+  trail_run: "트레일런",
+  triathlon: "트라이애슬론",
+  cycling: "사이클",
+};
+
 /** 코스 정렬 우선순위 (낮을수록 앞) */
-function courseSortKey(course: string): number {
-  const label = course.split("-").pop()?.toUpperCase() || "";
+function courseSortKey(competitionClass: string): number {
+  const label = competitionClass.toUpperCase();
   if (label === "FULL") return 0;
   if (label === "32K") return 1;
   if (label === "HALF") return 2;
@@ -22,7 +29,6 @@ function courseSortKey(course: string): number {
 function deduplicateParticipants(participants: RaceParticipant[]): RaceParticipant[] {
   const map = new Map<string, RaceParticipant>();
   for (const p of participants) {
-    // 마지막 항목이 남음
     map.set(p.memberName, p);
   }
   return Array.from(map.values());
@@ -39,22 +45,21 @@ export default function RaceCard({ race, onSignup }: RaceCardProps) {
   // 코스별 참가자 그룹
   const courseGroups = new Map<string, string[]>();
   for (const course of race.courses) {
-    courseGroups.set(course, []);
+    courseGroups.set(course.competitionClass, []);
   }
   // "미정"과 "응원" 항상 표시
-  const extraCourses = [`${race.category}-미정`, `${race.category}-응원`];
-  for (const ec of extraCourses) {
-    if (!courseGroups.has(ec)) {
-      courseGroups.set(ec, []);
+  for (const extra of ["미정", "응원"]) {
+    if (!courseGroups.has(extra)) {
+      courseGroups.set(extra, []);
     }
   }
 
   for (const p of uniqueParticipants) {
-    const existing = courseGroups.get(p.course);
+    const existing = courseGroups.get(p.competitionClass);
     if (existing) {
       existing.push(p.memberName);
     } else {
-      courseGroups.set(p.course, [p.memberName]);
+      courseGroups.set(p.competitionClass, [p.memberName]);
     }
   }
 
@@ -75,32 +80,29 @@ export default function RaceCard({ race, onSignup }: RaceCardProps) {
         <span className="text-white/50 text-sm">{race.date}</span>
         <h3 className="text-lg font-bold text-white">{race.name}</h3>
         <span className="rounded bg-white/10 px-2 py-0.5 text-xs text-white/60">
-          {race.category}
+          {TYPE_LABELS[race.type] || race.type}
         </span>
       </div>
 
       {/* 코스별 참가자 */}
       <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3">
-        {sortedCourses.map(([course, names]) => {
-          const label = course.split("-").slice(1).join("-") || course;
-          return (
-            <div key={course}>
-              <p className="text-sm font-medium text-white/80">
-                {label}{" "}
-                <span className="text-white/40">({names.length})</span>
-              </p>
-              {names.length > 0 && (
-                <ul className="mt-1 space-y-0.5">
-                  {names.map((n) => (
-                    <li key={n} className="text-xs text-white/60">
-                      · {n}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          );
-        })}
+        {sortedCourses.map(([competitionClass, names]) => (
+          <div key={competitionClass}>
+            <p className="text-sm font-medium text-white/80">
+              {competitionClass}{" "}
+              <span className="text-white/40">({names.length})</span>
+            </p>
+            {names.length > 0 && (
+              <ul className="mt-1 space-y-0.5">
+                {names.map((n) => (
+                  <li key={n} className="text-xs text-white/60">
+                    · {n}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))}
       </div>
 
       {/* 지난 대회 기록 */}

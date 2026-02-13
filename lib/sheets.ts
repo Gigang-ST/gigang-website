@@ -59,35 +59,37 @@ async function fetchSheet(gid: string): Promise<string[][]> {
 export async function fetchRaces(): Promise<RaceInfo[]> {
   const rows = await fetchSheet(GID.대회현황);
   return rows.map((row) => ({
-    date: row[0] || "",
-    name: row[1] || "",
-    category: row[2] || "",
-    courses: (row[3] || "")
-      .split(",")
-      .map((c) => c.trim())
-      .filter(Boolean),
-    note: row[4] || "",
+    competitionId: row[0] || "",
+    type: row[1] || "",
+    name: row[2] || "",
+    competitionClass: row[3] || "",
+    distanceKm: parseFloat(row[4]) || 0,
+    pbKey: row[5] || "",
+    date: row[6] || "",
   }));
 }
 
 export async function fetchParticipants(): Promise<RaceParticipant[]> {
   const rows = await fetchSheet(GID.대회참여현황);
   return rows.map((row) => ({
-    registeredDate: row[0] || "",
-    raceName: row[1] || "",
-    course: row[2] || "",
-    memberName: row[3] || "",
-    resolution: row[4] || "",
+    memberId: row[0] || "",
+    memberName: row[1] || "",
+    competitionId: row[2] || "",
+    competitionName: row[3] || "",
+    competitionClass: row[4] || "",
+    status: row[5] || "",
+    pledge: row[6] || "",
   }));
 }
 
 export async function fetchMembers(): Promise<Member[]> {
   const rows = await fetchSheet(GID.가입신청서);
   return rows.map((row) => ({
+    memberId: row[0] || "",
     name: row[1] || "",
     gender: row[2] || "",
     birthDate: row[3] || "",
-    isWithdrawn: (row[10] || "").trim() !== "",
+    status: row[5] || "",
   }));
 }
 

@@ -17,17 +17,20 @@ import type {
 import RaceCard from "@/components/race-card";
 import RaceSignupDialog from "@/components/race-signup-dialog";
 
-/** "2026. 2. 22" → Date 객체 */
-function parseKoreanDate(str: string): Date {
-  const parts = str
-    .replace(/\./g, "")
-    .trim()
-    .split(/\s+/)
-    .map(Number);
+/** "2024-08-17" 또는 "2026. 2. 22" → Date 객체 */
+function parseDate(str: string): Date {
+  const trimmed = str.trim();
+  // YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    const [y, m, d] = trimmed.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  }
+  // "2026. 2. 22" (대회기록 등 구 형식)
+  const parts = trimmed.replace(/\./g, "").split(/\s+/).map(Number);
   if (parts.length === 3) {
     return new Date(parts[0], parts[1] - 1, parts[2]);
   }
-  return new Date(str);
+  return new Date(trimmed);
 }
 
 /** 오늘 자정 기준 */
@@ -37,6 +40,9 @@ function todayMidnight(): Date {
   return d;
 }
 
+/**
+ * 대회현황 행(competition_id 단위)을 같은 대회명+날짜로 그룹핑하여 Race 배열 생성
+ */
 function buildRaces(
   raceInfos: RaceInfo[],
   participants: RaceParticipant[],
@@ -44,26 +50,52 @@ function buildRaces(
 ): Race[] {
   const today = todayMidnight();
 
-  return raceInfos.map((info) => {
-    const raceDate = parseKoreanDate(info.date);
+  // 같은 대회명 + 날짜로 그룹핑
+  const raceMap = new Map<
+    string,
+    { infos: RaceInfo[]; date: string; name: string; type: string }
+  >();
+
+  for (const info of raceInfos) {
+    const key = `${info.date}_${info.name}`;
+    if (!raceMap.has(key)) {
+      raceMap.set(key, {
+        infos: [],
+        date: info.date,
+        name: info.name,
+        type: info.type,
+      });
+    }
+    raceMap.get(key)!.infos.push(info);
+  }
+
+  return Array.from(raceMap.values()).map(({ infos, date, name, type }) => {
+    const raceDate = parseDate(date);
     const isPast = raceDate < today;
 
-    // 코스 형식: "마라톤-FULL"
-    const courses = info.courses.map((c) => `${info.category}-${c}`);
+    const courses = infos.map((info) => ({
+      competitionId: info.competitionId,
+      competitionClass: info.competitionClass,
+    }));
 
-    // 해당 대회 참가자
+    // 이 대회에 속하는 competition_id 집합
+    const compIds = new Set(infos.map((i) => i.competitionId));
+
+    // 참가자 매칭: competition_id 일치 또는 (id 없이 대회명 일치)
     const raceParticipants = participants.filter(
-      (p) => p.raceName === info.name,
+      (p) =>
+        compIds.has(p.competitionId) ||
+        (!p.competitionId && p.competitionName === name),
     );
 
-    // 해당 대회 기록 (대회명으로 매칭)
-    const raceRecords = records.filter((r) => r.raceName === info.name);
+    // 기록 매칭 (대회명 기준)
+    const raceRecords = records.filter((r) => r.raceName === name);
 
     return {
-      id: `${info.date}_${info.name}`,
-      date: info.date,
-      name: info.name,
-      category: info.category,
+      id: `${date}_${name}`,
+      date,
+      name,
+      type,
       courses,
       participants: raceParticipants,
       records: raceRecords,
@@ -105,7 +137,7 @@ export default function RaceParticipation() {
       // 낙관적 업데이트: races 배열의 해당 대회에 참가자 추가
       setRaces((prev) =>
         prev.map((r) =>
-          r.name === participant.raceName
+          r.name === participant.competitionName
             ? { ...r, participants: [...r.participants, participant] }
             : r,
         ),
@@ -136,11 +168,11 @@ export default function RaceParticipation() {
 
   const upcoming = races
     .filter((r) => !r.isPast)
-    .sort((a, b) => parseKoreanDate(a.date).getTime() - parseKoreanDate(b.date).getTime());
+    .sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime());
 
   const recent = races
-    .filter((r) => r.isPast && parseKoreanDate(r.date) >= sixtyDaysAgo)
-    .sort((a, b) => parseKoreanDate(b.date).getTime() - parseKoreanDate(a.date).getTime());
+    .filter((r) => r.isPast && parseDate(r.date) >= sixtyDaysAgo)
+    .sort((a, b) => parseDate(b.date).getTime() - parseDate(a.date).getTime());
 
   return (
     <>
