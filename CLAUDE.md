@@ -37,7 +37,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **읽기**: `lib/sheets.ts`에서 CSV export를 클라이언트 사이드로 fetch하고, RFC 4180 파서(`lib/csv.ts`)로 파싱 후 sessionStorage에 캐싱(5분 TTL). 모든 데이터 타입은 `lib/types.ts`에 정의.
 
-**쓰기**: 폼에서 JSON을 Google Apps Script 웹훅(`NEXT_PUBLIC_GOOGLE_SCRIPT_URL` 환경변수)으로 전송하면 스프레드시트에 행 추가. 요청은 `mode: "no-cors"` 사용.
+**쓰기**: 폼에서 JSON을 Google Apps Script 웹훅으로 전송하면 스프레드시트에 행 추가. 요청은 `mode: "no-cors"` 사용.
+
+**Google Apps Script URL**: `https://script.google.com/macros/s/AKfycbx3krlBXHEHMO1WxeTfIU3JCs48jqLsGetygJ5Crw5Tn1byI_86TrgFnYhGMNtYxUyAXw/exec` (환경변수 `NEXT_PUBLIC_GOOGLE_SCRIPT_URL`)
+
+**Google Apps Script**: `google-apps-script/` 디렉토리에 실제 배포된 Apps Script 코드와 동일한 소스가 관리됨. 스프레드시트 쓰기 로직 변경 시 이 디렉토리의 코드도 함께 수정할 것.
 
 ### 페이지 및 주요 컴포넌트
 

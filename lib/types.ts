@@ -29,13 +29,21 @@ export type Member = {
   status: string;     // "active" | "inactive" | "banned"
 };
 
-/** 대회기록 시트 한 행 */
+/** 대회기록 시트 한 행 (15컬럼) */
 export type RaceRecord = {
-  name: string;
-  raceName: string;
-  course: string;
-  record: string;     // "1:32:32"
-  raceDate: string;   // "2025. 4. 13"
+  recordId: string;          // "rec_001"
+  recordType: string;        // "marathon" | "trail" | "triathlon"
+  memberName: string;        // "이현근"
+  competitionId: string;     // "comp_055" (선택)
+  competitionName: string;   // "JTBC 마라톤"
+  competitionClass: string;  // "Full" | "Half" | "10K" | "King" | "Olympic"
+  record: string;            // "3:25:10"
+  competitionDate: string;   // "2025-11-02"
+  swimTime: string;          // 철인3종 전용
+  bikeTime: string;          // 철인3종 전용
+  runTime: string;           // 철인3종 전용
+  utmbSlug: string;          // 트레일 전용 "7477568.hyeongeun.lee"
+  utmbIndex: string;         // 트레일 전용 UTMB 인덱스 점수
 };
 
 /** 대회 카드의 코스 정보 */

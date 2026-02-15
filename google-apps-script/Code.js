@@ -1,5 +1,5 @@
 // ============================================
-// Google Apps Script - 기강 가입신청서 + 대회참여
+// Google Apps Script - 기강 가입신청서 + 대회참여 + 대회기록
 // ============================================
 //
 // 설정 방법:
@@ -13,6 +13,9 @@
 //
 // 4. "대회참여현황" 시트 헤더:
 //    | 작성일 | 대회 | 코스 | 이름 | 각오 |
+//
+// 4-1. "대회기록" 시트 헤더:
+//    | record_id | record_type | member_name | competition_id | competition_name | competition_class | record | competition_date | swim_time | bike_time | run_time | utmb_slug | utmb_index | created_at | updated_at |
 //
 // 5. 확장 프로그램 → Apps Script 열기
 //
@@ -44,6 +47,33 @@ function doPost(e) {
       data.memberName,
       data.resolution || ""
     ]);
+
+  } else if (data.action === "recordSubmit") {
+    // 대회 기록 제출
+    var sheet = ss.getSheetByName("대회기록");
+    var lastRow = sheet.getLastRow();
+    var nextId = "rec_" + ("000" + lastRow).slice(-3);
+    var now = new Date();
+    var timestamp = Utilities.formatDate(now, "Asia/Seoul", "yyyy-MM-dd HH:mm:ss");
+
+    sheet.appendRow([
+      nextId,                          // record_id
+      data.recordType || "",           // record_type
+      data.memberName || "",           // member_name
+      data.competitionId || "",        // competition_id
+      data.competitionName || "",      // competition_name
+      data.competitionClass || "",     // competition_class
+      data.record || "",               // record
+      data.competitionDate || "",      // competition_date
+      data.swimTime || "",             // swim_time
+      data.bikeTime || "",             // bike_time
+      data.runTime || "",              // run_time
+      data.utmbSlug || "",             // utmb_slug
+      data.utmbIndex || "",            // utmb_index
+      timestamp,                       // created_at
+      timestamp                        // updated_at
+    ]);
+
   } else {
     // 기존 가입신청서 로직 (하위 호환)
     var sheet = ss.getSheetByName("가입신청서");
@@ -96,6 +126,29 @@ function testRaceParticipation() {
         course: "마라톤-FULL",
         memberName: "테스트",
         resolution: "서브3!"
+      })
+    }
+  };
+  doPost(fakeEvent);
+}
+
+function testRecordSubmit() {
+  var fakeEvent = {
+    postData: {
+      contents: JSON.stringify({
+        action: "recordSubmit",
+        recordType: "marathon",
+        memberName: "테스트",
+        competitionId: "comp_055",
+        competitionName: "JTBC 마라톤",
+        competitionClass: "Full",
+        record: "3:25:10",
+        competitionDate: "2025-11-02",
+        swimTime: "",
+        bikeTime: "",
+        runTime: "",
+        utmbSlug: "",
+        utmbIndex: ""
       })
     }
   };
