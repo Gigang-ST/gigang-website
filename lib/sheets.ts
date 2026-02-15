@@ -96,10 +96,18 @@ export async function fetchMembers(): Promise<Member[]> {
 export async function fetchRecords(): Promise<RaceRecord[]> {
   const rows = await fetchSheet(GID.대회기록);
   return rows.map((row) => ({
-    name: row[0] || "",
-    raceName: row[1] || "",
-    course: row[2] || "",
-    record: row[3] || "",
-    raceDate: row[4] || "",
+    recordId: row[0] || "",
+    recordType: row[1] || "",
+    memberName: row[2] || "",
+    competitionId: row[3] || "",
+    competitionName: row[4] || "",
+    competitionClass: row[5] || "",
+    record: row[6] || "",
+    competitionDate: row[7] || "",
+    swimTime: row[8] || "",
+    bikeTime: row[9] || "",
+    runTime: row[10] || "",
+    utmbSlug: row[11] || "",
+    utmbIndex: row[12] || "",
   }));
 }

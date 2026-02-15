@@ -89,7 +89,7 @@ function buildRaces(
     );
 
     // 기록 매칭 (대회명 기준)
-    const raceRecords = records.filter((r) => r.raceName === name);
+    const raceRecords = records.filter((r) => r.competitionName === name);
 
     return {
       id: `${date}_${name}`,

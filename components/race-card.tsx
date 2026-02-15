@@ -120,9 +120,9 @@ export default function RaceCard({ race, onSignup }: RaceCardProps) {
               </thead>
               <tbody>
                 {records.map((r, i) => (
-                  <tr key={`${r.name}-${i}`} className="border-b border-white/5">
-                    <td className="py-1 pr-3">{r.name}</td>
-                    <td className="py-1 pr-3">{r.course}</td>
+                  <tr key={`${r.memberName}-${i}`} className="border-b border-white/5">
+                    <td className="py-1 pr-3">{r.memberName}</td>
+                    <td className="py-1 pr-3">{r.competitionClass}</td>
                     <td className="py-1">{r.record}</td>
                   </tr>
                 ))}
