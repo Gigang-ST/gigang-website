@@ -71,17 +71,51 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Conventional Commits 접두사 + 한글 설명: `docs: CLAUDE.md 추가`, `fix: 이미지 최적화 활성화`
 - 모든 문서, 주석, 설명은 한글로 작성
 
+## 에이전트 팀 워크플로우
+
+코드 작업 시 에이전트를 **적극적으로 활용**하여 병렬 처리와 품질을 높인다.
+
+### 자동 실행 규칙
+
+1. **코드 수정 완료 후**: `build-validator`와 `dead-code-eliminator`를 **병렬로** 백그라운드 실행
+2. **`config.ts` 수정 필요 시**: `config-editor` 에이전트에 위임
+3. **새 페이지/컴포넌트 생성 시**: `page-scaffolder` 에이전트에 위임
+4. **시트 데이터 확인 필요 시**: `sheets-inspector` 에이전트에 위임
+5. **독립적인 작업이 2개 이상이면**: 에이전트를 병렬로 실행하여 동시 처리
+
+### 병렬 실행 패턴
+
+```
+예시: 새 페이지 추가 요청
+1. page-scaffolder → 페이지/컴포넌트 생성 (백그라운드)
+2. config-editor → 네비게이션 항목 추가 (백그라운드, 동시)
+3. 두 작업 완료 후 → build-validator + dead-code-eliminator 병렬 실행
+```
+
+```
+예시: 코드 수정 요청
+1. 메인 에이전트가 직접 코드 수정
+2. 수정 완료 → build-validator + dead-code-eliminator 병렬 백그라운드 실행
+3. 결과 확인 후 에러 있으면 수정
+```
+
+### 주의사항
+
+- 단순 작업(한두 줄 수정)에는 에이전트 불필요, 직접 처리
+- 에이전트 결과는 사용자에게 요약하여 보고
+- 빌드 검증에서 에러 발견 시 직접 수정 후 다시 검증
+
 ## 커스텀 도구
 
 ### 에이전트 (`.claude/agents/`)
 
-| 에이전트 | 모델 | 용도 |
-|---|---|---|
-| `build-validator` | haiku | 타입체크 → 린트 → 빌드 순차 검증 및 에러 보고 |
-| `sheets-inspector` | haiku | Google Sheets 4개 시트 데이터 조회/분석/정합성 검사 |
-| `page-scaffolder` | sonnet | 새 페이지/컴포넌트를 기존 패턴에 맞게 스캐폴딩 |
-| `config-editor` | haiku | `config.ts` 사이트 콘텐츠(회칙, 네비, 연락처 등) 수정 |
-| `dead-code-eliminator` | sonnet | 미사용 코드, 불필요한 import 탐지 및 제거 |
+| 에이전트 | 모델 | 용도 | 자동 실행 |
+|---|---|---|---|
+| `build-validator` | haiku | 타입체크 → 린트 → 빌드 순차 검증 및 에러 보고 | 코드 수정 후 |
+| `dead-code-eliminator` | sonnet | 미사용 코드, 불필요한 import 탐지 및 제거 | 코드 수정 후 |
+| `sheets-inspector` | haiku | Google Sheets 4개 시트 데이터 조회/분석/정합성 검사 | 데이터 확인 시 |
+| `page-scaffolder` | sonnet | 새 페이지/컴포넌트를 기존 패턴에 맞게 스캐폴딩 | 페이지 생성 시 |
+| `config-editor` | haiku | `config.ts` 사이트 콘텐츠(회칙, 네비, 연락처 등) 수정 | config 변경 시 |
 
 ### 커맨드 (`.claude/commands/`)
 
