@@ -4,8 +4,8 @@
 //
 // 설정 방법:
 // 1. Google Sheets 열기
-//    https://docs.google.com/spreadsheets/d/16Z3GOjYhPLx4UYxg5B-BeQ_LHmtDX7xP4_VwgDsASIw
-//
+//    /* 취약점 점검 20260216 junmink 시트 ID 노출 삭제 */
+//    https://docs.google.com/spreadsheets/d/____
 // 2. 시트 이름을 "가입신청서"로 설정
 //
 // 3. 첫 번째 행(헤더)에 아래 순서대로 입력:
@@ -34,7 +34,8 @@
 // ----- 여기부터 Apps Script에 붙여넣기 -----
 
 function doPost(e) {
-  var ss = SpreadsheetApp.openById("16Z3GOjYhPLx4UYxg5B-BeQ_LHmtDX7xP4_VwgDsASIw");
+  /* 취약점 점검 20260216 junmink 시트 ID 노출 삭제 */
+  var ss = SpreadsheetApp.openById("____");
   var data = JSON.parse(e.postData.contents);
 
   if (data.action === "raceParticipation") {
