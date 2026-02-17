@@ -1,18 +1,7 @@
 import { parseCSV } from "./csv";
 import type { RaceInfo, RaceParticipant, Member, RaceRecord } from "./types";
 
-const SHEET_ID = "16Z3GOjYhPLx4UYxg5B-BeQ_LHmtDX7xP4_VwgDsASIw";
-
-const GID = {
-  대회현황: "267782969",
-  대회참여현황: "573958893",
-  가입신청서: "0",
-  대회기록: "1638315503",
-} as const;
-
-function csvUrl(gid: string): string {
-  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
-}
+type SheetName = "races" | "participants" | "members" | "records";
 
 const CACHE_TTL = 5 * 60 * 1000; // 5분
 
@@ -41,13 +30,13 @@ function setCache<T>(key: string, data: T): void {
   }
 }
 
-async function fetchSheet(gid: string): Promise<string[][]> {
-  const cacheKey = `sheet_${gid}`;
+async function fetchSheet(name: SheetName): Promise<string[][]> {
+  const cacheKey = `sheet_${name}`;
   const cached = getCached<string[][]>(cacheKey);
   if (cached) return cached;
 
-  const res = await fetch(csvUrl(gid));
-  if (!res.ok) throw new Error(`Failed to fetch sheet ${gid}: ${res.status}`);
+  const res = await fetch(`/api/sheets/${name}`);
+  if (!res.ok) throw new Error(`Failed to fetch sheet ${name}: ${res.status}`);
   const text = await res.text();
   const rows = parseCSV(text);
   // 헤더 제거
@@ -57,7 +46,7 @@ async function fetchSheet(gid: string): Promise<string[][]> {
 }
 
 export async function fetchRaces(): Promise<RaceInfo[]> {
-  const rows = await fetchSheet(GID.대회현황);
+  const rows = await fetchSheet("races");
   return rows.map((row) => ({
     competitionId: row[0] || "",
     type: row[1] || "",
@@ -70,7 +59,7 @@ export async function fetchRaces(): Promise<RaceInfo[]> {
 }
 
 export async function fetchParticipants(): Promise<RaceParticipant[]> {
-  const rows = await fetchSheet(GID.대회참여현황);
+  const rows = await fetchSheet("participants");
   return rows.map((row) => ({
     memberId: row[0] || "",
     memberName: row[1] || "",
@@ -83,7 +72,7 @@ export async function fetchParticipants(): Promise<RaceParticipant[]> {
 }
 
 export async function fetchMembers(): Promise<Member[]> {
-  const rows = await fetchSheet(GID.가입신청서);
+  const rows = await fetchSheet("members");
   return rows.map((row) => ({
     memberId: row[0] || "",
     name: row[1] || "",
@@ -94,7 +83,7 @@ export async function fetchMembers(): Promise<Member[]> {
 }
 
 export async function fetchRecords(): Promise<RaceRecord[]> {
-  const rows = await fetchSheet(GID.대회기록);
+  const rows = await fetchSheet("records");
   return rows.map((row) => ({
     recordId: row[0] || "",
     recordType: row[1] || "",

@@ -23,7 +23,7 @@ export default [
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
     plugins: {
-      react,
+      react: react,
       "react-hooks": reactHooks,
       "@next/next": next,
     },
@@ -44,11 +44,6 @@ export default [
       "@next/next/no-html-link-for-pages": "error",
       "@next/next/no-img-element": "warn",
       "@typescript-eslint/no-unused-vars": "warn",
-    },
-    settings: {
-      react: {
-        version: "detect",
-      },
     },
   },
 ];

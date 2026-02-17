@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { validateBirthDate, normalizeBirthDate } from "@/lib/validation";
+import { sanitizeText } from "@/lib/sanitize";
 import type { Race, Member, RaceParticipant } from "@/lib/types";
 
 type Props = {
@@ -117,11 +118,11 @@ export default function RaceSignupDialog({
     const payload = {
       action: "raceParticipation",
       memberId: verifiedMemberId,
-      memberName: name.trim(),
+      memberName: sanitizeText(name, 20),
       competitionId: matchedCourse?.competitionId || "",
       competitionName: race.name,
       competitionClass: selectedCourse,
-      pledge: resolution.trim(),
+      pledge: sanitizeText(resolution, 100),
     };
 
     try {
@@ -178,6 +179,7 @@ export default function RaceSignupDialog({
                   setName(e.target.value);
                   setVerifyError("");
                 }}
+                maxLength={20}
                 className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
               />
             </div>
@@ -250,6 +252,7 @@ export default function RaceSignupDialog({
                 placeholder="한 줄 각오"
                 value={resolution}
                 onChange={(e) => setResolution(e.target.value)}
+                maxLength={100}
                 className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
               />
             </div>

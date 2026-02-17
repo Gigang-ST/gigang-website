@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { validateBirthDate, normalizeBirthDate } from "@/lib/validation";
+import { sanitizeText } from "@/lib/sanitize";
 import type { RaceRecord, Member } from "@/lib/types";
 
 type Props = {
@@ -124,15 +125,15 @@ export default function TrailRegisterDialog({
   const handleSubmit = useCallback(async () => {
     setSubmitting(true);
 
-    const utmbSlug = slug.trim();
+    const utmbSlug = sanitizeText(slug, 100).replace(/[^a-zA-Z0-9._-]/g, "");
     const utmbIndex = String(utmbData?.utmbIndex ?? "");
-    const competitionName = utmbData?.recentRaces?.[0]?.eventName || "";
-    const record = utmbData?.recentRaces?.[0]?.time || "";
+    const competitionName = sanitizeText(utmbData?.recentRaces?.[0]?.eventName || "", 100);
+    const record = sanitizeText(utmbData?.recentRaces?.[0]?.time || "", 20);
 
     const payload = {
       action: "recordSubmit",
       recordType: "trail",
-      memberName: name.trim(),
+      memberName: sanitizeText(name, 20),
       competitionId: "",
       competitionName,
       competitionClass: "",
@@ -248,6 +249,7 @@ export default function TrailRegisterDialog({
                     setFetchError("");
                     setUtmbData(null);
                   }}
+                  maxLength={100}
                   className="flex-1 border-white/20 bg-white/5 text-white placeholder:text-white/40"
                 />
                 <Button

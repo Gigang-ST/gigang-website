@@ -26,6 +26,15 @@ export default function TrailTab({ records, members, onRecordSubmitted }: Props)
 
   return (
     <div>
+      <div className="mt-4 mb-6">
+        <Button
+          onClick={() => setDialogOpen(true)}
+          className="w-full bg-white text-black hover:bg-white/90"
+        >
+          UTMB 프로필 등록
+        </Button>
+      </div>
+
       {trailRecords.length === 0 ? (
         <p className="py-10 text-center text-white/50">
           등록된 UTMB 프로필이 없습니다.
@@ -61,9 +70,9 @@ export default function TrailTab({ records, members, onRecordSubmitted }: Props)
                   </td>
                   <td className="py-2 pr-3 font-mono">{r.record || "-"}</td>
                   <td className="py-2">
-                    {r.utmbSlug ? (
+                    {r.utmbSlug && /^[\w.-]+$/.test(r.utmbSlug) ? (
                       <a
-                        href={`https://utmb.world/en/runner/${r.utmbSlug}`}
+                        href={`https://utmb.world/en/runner/${encodeURIComponent(r.utmbSlug)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-400 underline underline-offset-2 hover:text-blue-300 text-xs"
@@ -80,15 +89,6 @@ export default function TrailTab({ records, members, onRecordSubmitted }: Props)
           </table>
         </div>
       )}
-
-      <div className="mt-6">
-        <Button
-          onClick={() => setDialogOpen(true)}
-          className="w-full bg-white text-black hover:bg-white/90"
-        >
-          UTMB 프로필 등록
-        </Button>
-      </div>
 
       <TrailRegisterDialog
         members={members}
