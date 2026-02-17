@@ -102,6 +102,15 @@ export default function MarathonTab({ records, members, races, onRecordSubmitted
 
   return (
     <div>
+      <div className="mt-4 mb-6">
+        <Button
+          onClick={() => setDialogOpen(true)}
+          className="w-full bg-white text-black hover:bg-white/90"
+        >
+          대회기록 입력
+        </Button>
+      </div>
+
       <div className="space-y-10">
         {COURSES.map((course) => {
           const ranked = bestPerPerson(marathonRecords, course.value);
@@ -130,15 +139,6 @@ export default function MarathonTab({ records, members, races, onRecordSubmitted
             </div>
           );
         })}
-      </div>
-
-      <div className="mt-6">
-        <Button
-          onClick={() => setDialogOpen(true)}
-          className="w-full bg-white text-black hover:bg-white/90"
-        >
-          대회기록 입력
-        </Button>
       </div>
 
       <RecordInputDialog

@@ -26,6 +26,15 @@ export default function TrailTab({ records, members, onRecordSubmitted }: Props)
 
   return (
     <div>
+      <div className="mt-4 mb-6">
+        <Button
+          onClick={() => setDialogOpen(true)}
+          className="w-full bg-white text-black hover:bg-white/90"
+        >
+          UTMB 프로필 등록
+        </Button>
+      </div>
+
       {trailRecords.length === 0 ? (
         <p className="py-10 text-center text-white/50">
           등록된 UTMB 프로필이 없습니다.
@@ -80,15 +89,6 @@ export default function TrailTab({ records, members, onRecordSubmitted }: Props)
           </table>
         </div>
       )}
-
-      <div className="mt-6">
-        <Button
-          onClick={() => setDialogOpen(true)}
-          className="w-full bg-white text-black hover:bg-white/90"
-        >
-          UTMB 프로필 등록
-        </Button>
-      </div>
 
       <TrailRegisterDialog
         members={members}
