@@ -61,9 +61,9 @@ export default function TrailTab({ records, members, onRecordSubmitted }: Props)
                   </td>
                   <td className="py-2 pr-3 font-mono">{r.record || "-"}</td>
                   <td className="py-2">
-                    {r.utmbSlug ? (
+                    {r.utmbSlug && /^[\w.-]+$/.test(r.utmbSlug) ? (
                       <a
-                        href={`https://utmb.world/en/runner/${r.utmbSlug}`}
+                        href={`https://utmb.world/en/runner/${encodeURIComponent(r.utmbSlug)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-400 underline underline-offset-2 hover:text-blue-300 text-xs"

@@ -26,16 +26,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 데이터 흐름 — Google Sheets 백엔드
 
-모든 데이터는 단일 Google 스프레드시트(ID: `16Z3GOjYhPLx4UYxg5B-BeQ_LHmtDX7xP4_VwgDsASIw`)에 저장되며 4개 시트를 사용:
+모든 데이터는 단일 Google 스프레드시트에 저장되며 4개 시트를 사용. 스프레드시트 ID는 서버 전용 환경변수 `GOOGLE_SHEET_ID`에 저장 (클라이언트 노출 없음):
 
-| 시트 (gid) | 용도 | 타입 |
+| 시트 (API 이름) | 용도 | 타입 |
 |---|---|---|
-| 대회현황 (267782969) | 대회 목록 | `RaceInfo` |
-| 대회참여현황 (573958893) | 대회 참가자 | `RaceParticipant` |
-| 가입신청서 (0) | 회원 명단 | `Member` |
-| 대회기록 (1638315503) | 대회 기록 | `RaceRecord` |
+| 대회현황 (`races`) | 대회 목록 | `RaceInfo` |
+| 대회참여현황 (`participants`) | 대회 참가자 | `RaceParticipant` |
+| 가입신청서 (`members`) | 회원 명단 | `Member` |
+| 대회기록 (`records`) | 대회 기록 | `RaceRecord` |
 
-**읽기**: `lib/sheets.ts`에서 CSV export를 클라이언트 사이드로 fetch하고, RFC 4180 파서(`lib/csv.ts`)로 파싱 후 sessionStorage에 캐싱(5분 TTL). 모든 데이터 타입은 `lib/types.ts`에 정의.
+**읽기**: 클라이언트(`lib/sheets.ts`)에서 `/api/sheets/{name}` API Route로 fetch → 서버에서 Google CSV export를 프록시(5분 ISR 캐싱) → 클라이언트에서 RFC 4180 파서(`lib/csv.ts`)로 파싱 후 sessionStorage에 캐싱(5분 TTL). 모든 데이터 타입은 `lib/types.ts`에 정의. API Route: `app/api/sheets/[sheet]/route.ts`.
 
 **쓰기**: 폼에서 JSON을 Google Apps Script 웹훅으로 전송하면 스프레드시트에 행 추가. 요청은 `mode: "no-cors"` 사용.
 
@@ -65,6 +65,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **폰트**: Pretendard(본문, `lib/fonts.ts`에서 로드), 나눔명조(히어로 텍스트, `app/fonts/` 로컬 파일).
 - **생년월일 형식**: `YYMMDD` 또는 `YYYY-MM-DD`, `lib/validation.ts`에서 검증/정규화. 세기 구분: 00-30 → 2000년대, 31-99 → 1900년대.
 - **빌드 참고**: `next.config.ts`에서 TypeScript와 ESLint 빌드 에러를 무시함. `pnpm typecheck`과 `pnpm lint`는 수동으로 실행할 것.
+
+## 보안
+
+### 원칙
+
+- **서버 전용 비밀값**: Google 스프레드시트 ID 등 민감 정보는 `NEXT_PUBLIC_` 없이 환경변수에 저장하고, API Route를 통해 프록시. 클라이언트 번들에 비밀값이 포함되지 않도록 할 것.
+- **입력 검증은 경계에서**: 사용자 입력을 받는 모든 폼에서 제출 전 `lib/sanitize.ts`의 `sanitizeText()`로 정리 (HTML 태그, 제어 문자 제거, 길이 제한). 텍스트 `<Input>`에는 반드시 `maxLength` 속성 부여.
+- **동적 URL 생성 금지**: 사용자 입력이나 외부 데이터를 `href`, `src` 등 URL 속성에 직접 삽입하지 말 것. 반드시 화이트리스트 패턴 검증 + `encodeURIComponent()` 적용. (예: `trail-tab.tsx`의 `utmbSlug`)
+- **API Route 입력**: 동적 라우트 파라미터는 화이트리스트 맵으로 검증. 허용되지 않은 값은 404 반환.
+
+### 체크리스트 (새 폼/API 추가 시)
+
+1. 텍스트 입력 필드에 `maxLength` 설정했는가?
+2. 제출 payload에 `sanitizeText()` 적용했는가?
+3. 외부 데이터를 URL 속성에 넣을 때 패턴 검증 + 인코딩 했는가?
+4. 서버 전용 비밀값이 `NEXT_PUBLIC_`으로 노출되지 않는가?
 
 ## 커밋 컨벤션
 

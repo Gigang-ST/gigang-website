@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { validateBirthDate, normalizeBirthDate } from "@/lib/validation";
+import { sanitizeText } from "@/lib/sanitize";
 import { parseTimeToSeconds, formatSecondsToTime } from "@/lib/records-utils";
 import type { RaceRecord, Member, RaceInfo } from "@/lib/types";
 
@@ -158,15 +159,15 @@ export default function RecordInputDialog({
     const payload = {
       action: "recordSubmit",
       recordType: mode,
-      memberName: name.trim(),
+      memberName: sanitizeText(name, 20),
       competitionId: matchedCompId,
-      competitionName: raceName.trim(),
+      competitionName: sanitizeText(raceName, 50),
       competitionClass: course,
-      record,
+      record: sanitizeText(record, 20),
       competitionDate: raceDate,
-      swimTime: mode === "triathlon" ? swimTime : "",
-      bikeTime: mode === "triathlon" ? bikeTime : "",
-      runTime: mode === "triathlon" ? runTime : "",
+      swimTime: mode === "triathlon" ? sanitizeText(swimTime, 20) : "",
+      bikeTime: mode === "triathlon" ? sanitizeText(bikeTime, 20) : "",
+      runTime: mode === "triathlon" ? sanitizeText(runTime, 20) : "",
       utmbSlug: "",
       utmbIndex: "",
     };
@@ -299,6 +300,7 @@ export default function RecordInputDialog({
                   placeholder="대회명 입력"
                   value={customRaceName}
                   onChange={(e) => setCustomRaceName(e.target.value)}
+                  maxLength={50}
                   className="mt-2 border-white/20 bg-white/5 text-white placeholder:text-white/40"
                 />
               )}
@@ -345,6 +347,7 @@ export default function RecordInputDialog({
                   placeholder="예: 3:25:10"
                   value={record}
                   onChange={(e) => setRecord(e.target.value)}
+                  maxLength={20}
                   className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
                 />
               </div>
@@ -359,6 +362,7 @@ export default function RecordInputDialog({
                     placeholder="예: 2:36:46"
                     value={record}
                     onChange={(e) => setRecord(e.target.value)}
+                    maxLength={20}
                     className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
                   />
                 </div>
