@@ -4,7 +4,7 @@
 //
 // 설정 방법:
 // 1. Google Sheets 열기
-//    /* 취약점 점검 20260216 junmink 시트 ID 노출 삭제 */
+//    /* 취약점 점검 20260216 junmink 노출된 시트 ID 삭제 */
 //    https://docs.google.com/spreadsheets/d/____
 // 2. 시트 이름을 "가입신청서"로 설정
 //
@@ -34,7 +34,7 @@
 // ----- 여기부터 Apps Script에 붙여넣기 -----
 
 function doPost(e) {
-  /* 취약점 점검 20260216 junmink 시트 ID 노출 삭제 */
+  /* 취약점 점검 20260216 junmink 노출된 시트 ID 삭제 */
   var ss = SpreadsheetApp.openById("____");
   var data = JSON.parse(e.postData.contents);
 

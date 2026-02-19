@@ -19,8 +19,8 @@
 ## Google Sheets 설정
 
 ### 1. 스프레드시트 준비
-
-- 현재 사용 중인 시트: https://docs.google.com/spreadsheets/d/16Z3GOjYhPLx4UYxg5B-BeQ_LHmtDX7xP4_VwgDsASIw
+/* 취약점 점검 20260216 junmink 노출된 시트 ID 삭제 */
+- 현재 사용 중인 시트: https://docs.google.com/spreadsheets/d/___
 - 시트 이름: `가입신청서` (정확히 일치해야 함)
 
 ### 2. 헤더 (첫 번째 행)
