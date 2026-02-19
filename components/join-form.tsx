@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { validateBirthDate, normalizeBirthDate } from "@/lib/validation";
+import { sanitizeText } from "@/lib/sanitize";
 
 const PRIVACY_TEXT = `개인정보 수집 및 이용 동의서
 
@@ -68,17 +69,17 @@ export default function JoinForm() {
     const formattedBirth = `${norm.slice(0, 4)}-${norm.slice(4, 6)}-${norm.slice(6, 8)}`;
 
     const noteParts = [
-      nearestStation && `거주지역: ${nearestStation}`,
-      runningExperience && `러닝경력: ${runningExperience}`,
+      nearestStation && `거주지역: ${sanitizeText(nearestStation, 20)}`,
+      runningExperience && `러닝경력: ${sanitizeText(runningExperience, 50)}`,
     ].filter(Boolean);
 
     const payload = {
       action: "join",
-      name,
+      name: sanitizeText(name, 20),
       gender,
       birthDate: formattedBirth,
-      phone: phone || "",
-      accountNumber: bankAccount || "",
+      phone: sanitizeText(phone, 20),
+      accountNumber: sanitizeText(bankAccount, 50),
       note: noteParts.join(", "),
     };
 
@@ -148,6 +149,7 @@ export default function JoinForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
+            maxLength={20}
             className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
           />
         </div>
@@ -207,6 +209,7 @@ export default function JoinForm() {
             placeholder="가까운 지하철역"
             value={nearestStation}
             onChange={(e) => setNearestStation(e.target.value)}
+            maxLength={20}
             className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
           />
         </div>
@@ -257,6 +260,7 @@ export default function JoinForm() {
             placeholder="추후 활동시 연락용"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
+            maxLength={20}
             className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
           />
         </div>
@@ -268,6 +272,7 @@ export default function JoinForm() {
             placeholder="회비, 환급 처리용"
             value={bankAccount}
             onChange={(e) => setBankAccount(e.target.value)}
+            maxLength={50}
             className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
           />
         </div>

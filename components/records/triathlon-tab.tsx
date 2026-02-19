@@ -107,6 +107,15 @@ export default function TriathlonTab({ records, members, races, onRecordSubmitte
 
   return (
     <div>
+      <div className="mt-4 mb-6">
+        <Button
+          onClick={() => setDialogOpen(true)}
+          className="w-full bg-white text-black hover:bg-white/90"
+        >
+          철인3종 기록 입력
+        </Button>
+      </div>
+
       <div className="space-y-8">
         {COURSES.map((course) => {
           const ranked = bestPerPerson(triRecords, course.value);
@@ -118,15 +127,6 @@ export default function TriathlonTab({ records, members, races, onRecordSubmitte
             />
           );
         })}
-      </div>
-
-      <div className="mt-6">
-        <Button
-          onClick={() => setDialogOpen(true)}
-          className="w-full bg-white text-black hover:bg-white/90"
-        >
-          철인3종 기록 입력
-        </Button>
       </div>
 
       <RecordInputDialog

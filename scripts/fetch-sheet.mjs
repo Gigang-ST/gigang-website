@@ -1,6 +1,38 @@
 #!/usr/bin/env node
 
-const SPREADSHEET_ID = "16Z3GOjYhPLx4UYxg5B-BeQ_LHmtDX7xP4_VwgDsASIw";
+import { readFileSync } from "fs";
+import { resolve } from "path";
+
+// .env.local에서 GOOGLE_SHEET_ID 읽기
+function loadEnv() {
+  try {
+    const envPath = resolve(process.cwd(), ".env.local");
+    const content = readFileSync(envPath, "utf-8");
+    for (const line of content.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eqIdx = trimmed.indexOf("=");
+      if (eqIdx === -1) continue;
+      const key = trimmed.slice(0, eqIdx).trim();
+      const value = trimmed.slice(eqIdx + 1).trim();
+      if (!process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  } catch {
+    // .env.local 없으면 무시
+  }
+}
+
+loadEnv();
+
+const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID || "";
+
+if (!SPREADSHEET_ID) {
+  console.error("GOOGLE_SHEET_ID 환경변수가 설정되지 않았습니다.");
+  console.error(".env.local 파일에 GOOGLE_SHEET_ID를 추가하거나 환경변수로 설정해주세요.");
+  process.exit(1);
+}
 
 /** 기본 시트 (빠른 조회용 캐시) */
 const KNOWN_SHEETS = {
