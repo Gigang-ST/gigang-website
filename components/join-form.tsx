@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { validateBirthDate, normalizeBirthDate } from "@/lib/validation";
 import { sanitizeText } from "@/lib/sanitize";
+import { createMember } from "@/app/actions/member";
 
 const PRIVACY_TEXT = `개인정보 수집 및 이용 동의서
 
@@ -30,285 +31,304 @@ const PRIVACY_TEXT = `개인정보 수집 및 이용 동의서
    - 개인정보 수집·이용에 동의하지 않을 권리가 있으나, 필수 항목 미동의 시 가입이 제한될 수 있습니다.`;
 
 export default function JoinForm() {
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
+	const [submitted, setSubmitted] = useState(false);
+	const [loading, setLoading] = useState(false);
 
-  const [name, setName] = useState("");
-  const [gender, setGender] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [birthDateError, setBirthDateError] = useState<string | null>(null);
-  const [nearestStation, setNearestStation] = useState("");
-  const [runningExperience, setRunningExperience] = useState("");
-  const [phone, setPhone] = useState("");
-  const [bankAccount, setBankAccount] = useState("");
-  const [privacyAgreed, setPrivacyAgreed] = useState(false);
+	const [name, setName] = useState("");
+	const [gender, setGender] = useState("");
+	const [birthDate, setBirthDate] = useState("");
+	const [birthDateError, setBirthDateError] = useState<string | null>(null);
+	const [nearestStation, setNearestStation] = useState("");
+	const [runningExperience, setRunningExperience] = useState("");
+	const [phone, setPhone] = useState("");
+	const [bankAccount, setBankAccount] = useState("");
+	const [privacyAgreed, setPrivacyAgreed] = useState(false);
 
-  const handleBirthDateChange = useCallback((value: string) => {
-    setBirthDate(value);
-    if (value) {
-      setBirthDateError(validateBirthDate(value));
-    } else {
-      setBirthDateError(null);
-    }
-  }, []);
+	const handleBirthDateChange = useCallback((value: string) => {
+		setBirthDate(value);
+		if (value) {
+			setBirthDateError(validateBirthDate(value));
+		} else {
+			setBirthDateError(null);
+		}
+	}, []);
 
-  const isValid =
-    name &&
-    gender &&
-    birthDate &&
-    !birthDateError &&
-    privacyAgreed;
+	const isValid = name && gender && birthDate && !birthDateError && privacyAgreed;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isValid) return;
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!isValid) return;
 
-    setLoading(true);
+		setLoading(true);
 
-    const norm = normalizeBirthDate(birthDate);
-    const formattedBirth = `${norm.slice(0, 4)}-${norm.slice(4, 6)}-${norm.slice(6, 8)}`;
+		const norm = normalizeBirthDate(birthDate);
+		const formattedBirth = `${norm.slice(0, 4)}-${norm.slice(4, 6)}-${norm.slice(6, 8)}`;
 
-    const noteParts = [
-      nearestStation && `거주지역: ${sanitizeText(nearestStation, 20)}`,
-      runningExperience && `러닝경력: ${sanitizeText(runningExperience, 50)}`,
-    ].filter(Boolean);
+		const noteParts = [
+			nearestStation &&
+				`거주지역: ${sanitizeText(nearestStation, 20)}`,
+			runningExperience &&
+				`러닝경력: ${sanitizeText(runningExperience, 50)}`,
+		].filter(Boolean);
 
-    const payload = {
-      action: "join",
-      name: sanitizeText(name, 20),
-      gender,
-      birthDate: formattedBirth,
-      phone: sanitizeText(phone, 20),
-      accountNumber: sanitizeText(bankAccount, 50),
-      note: noteParts.join(", "),
-    };
+		try {
+			await createMember({
+				full_name: sanitizeText(name, 20),
+				gender,
+				birthday: formattedBirth,
+				phone: sanitizeText(phone, 20),
+				status: "active",
+				account_number: sanitizeText(bankAccount, 50),
+				joined_at: new Date().toISOString().split("T")[0],
+				note: noteParts.join(", "),
+			});
+			setSubmitted(true);
+		} catch {
+			alert("제출 중 오류가 발생했습니다. 다시 시도해주세요.");
+		} finally {
+			setLoading(false);
+		}
+	};
 
-    try {
-      const scriptUrl = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL;
-      if (!scriptUrl) {
-        throw new Error("Google Script URL이 설정되지 않았습니다.");
-      }
-      await fetch(scriptUrl, {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify(payload),
-      });
-      setSubmitted(true);
-    } catch {
-      alert("제출 중 오류가 발생했습니다. 다시 시도해주세요.");
-    } finally {
-      setLoading(false);
-    }
-  };
+	if (submitted) {
+		return (
+			<div className="space-y-6 text-center">
+				<h2 className="text-3xl font-bold">환영합니다</h2>
+				<div className="space-y-2 text-white/80">
+					<p>양재천에서 같이 즐겁게 운동하는 사람들의 모임</p>
+					<p>언제든 모임을 만들거나 참여할 수 있습니다.</p>
+				</div>
+				<p className="text-lg font-semibold">
+					런닝베이스 2030 운동모임!
+				</p>
+				<p className="text-white/80">
+					러닝 · 자전거 · 수영 · 등산 · 대회 외 활동 다수!
+				</p>
+				<div className="space-y-2 text-left text-sm text-white/70">
+					<p>✨ 카카오톡에 사람이 더 많아요</p>
+					<p>📖 모임홈페이지에 크루에 대해 많이 적어뒀어요</p>
+					<p>💬 모임장은 언제나 놀고있으니 카톡 답변이 빠릅니다!</p>
+				</div>
+				<p className="font-medium">
+					기억에 남을만한 하루를 만들어봐요
+				</p>
+				<div className="rounded-lg border border-white/20 bg-white/5 p-4 text-left text-sm">
+					<p className="mb-2 font-semibold">
+						🔥 기강 단체 톡방 (중요)
+					</p>
+					<a
+						href="https://open.kakao.com/o/grnMFGng"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="text-blue-300 underline underline-offset-2 hover:text-blue-200"
+					>
+						https://open.kakao.com/o/grnMFGng
+					</a>
+					<p className="mt-1 text-white/60">비밀번호: 1017</p>
+				</div>
+			</div>
+		);
+	}
 
-  if (submitted) {
-    return (
-      <div className="space-y-6 text-center">
-        <h2 className="text-3xl font-bold">환영합니다</h2>
-        <div className="space-y-2 text-white/80">
-          <p>양재천에서 같이 즐겁게 운동하는 사람들의 모임</p>
-          <p>언제든 모임을 만들거나 참여할 수 있습니다.</p>
-        </div>
-        <p className="text-lg font-semibold">런닝베이스 2030 운동모임!</p>
-        <p className="text-white/80">
-          러닝 · 자전거 · 수영 · 등산 · 대회 외 활동 다수!
-        </p>
-        <div className="space-y-2 text-left text-sm text-white/70">
-          <p>✨ 카카오톡에 사람이 더 많아요</p>
-          <p>📖 모임홈페이지에 크루에 대해 많이 적어뒀어요</p>
-          <p>💬 모임장은 언제나 놀고있으니 카톡 답변이 빠릅니다!</p>
-        </div>
-        <p className="font-medium">기억에 남을만한 하루를 만들어봐요</p>
-        <div className="rounded-lg border border-white/20 bg-white/5 p-4 text-left text-sm">
-          <p className="mb-2 font-semibold">🔥 기강 단체 톡방 (중요)</p>
-          <a
-            href="https://open.kakao.com/o/grnMFGng"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-300 underline underline-offset-2 hover:text-blue-200"
-          >
-            https://open.kakao.com/o/grnMFGng
-          </a>
-          <p className="mt-1 text-white/60">비밀번호: 1017</p>
-        </div>
-      </div>
-    );
-  }
+	return (
+		<form onSubmit={handleSubmit} className="space-y-8">
+			{/* 필수 항목 */}
+			<fieldset className="space-y-5">
+				<legend className="text-lg font-semibold">필수 항목</legend>
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* 필수 항목 */}
-      <fieldset className="space-y-5">
-        <legend className="text-lg font-semibold">필수 항목</legend>
+				<div className="space-y-2">
+					<Label htmlFor="name">이름 *</Label>
+					<Input
+						id="name"
+						placeholder="이름"
+						value={name}
+						onChange={(e) => setName(e.target.value)}
+						required
+						maxLength={20}
+						className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
+					/>
+				</div>
 
-        <div className="space-y-2">
-          <Label htmlFor="name">이름 *</Label>
-          <Input
-            id="name"
-            placeholder="이름"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            maxLength={20}
-            className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
-          />
-        </div>
+				<div className="space-y-3">
+					<Label>성별 *</Label>
+					<RadioGroup value={gender} onValueChange={setGender}>
+						<div className="flex items-center gap-2">
+							<RadioGroupItem
+								value="male"
+								id="gender-male"
+								className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
+							/>
+							<Label
+								htmlFor="gender-male"
+								className="font-normal"
+							>
+								남
+							</Label>
+						</div>
+						<div className="flex items-center gap-2">
+							<RadioGroupItem
+								value="female"
+								id="gender-female"
+								className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
+							/>
+							<Label
+								htmlFor="gender-female"
+								className="font-normal"
+							>
+								여
+							</Label>
+						</div>
+					</RadioGroup>
+				</div>
 
-        <div className="space-y-3">
-          <Label>성별 *</Label>
-          <RadioGroup value={gender} onValueChange={setGender}>
-            <div className="flex items-center gap-2">
-              <RadioGroupItem
-                value="male"
-                id="gender-male"
-                className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
-              />
-              <Label htmlFor="gender-male" className="font-normal">
-                남
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <RadioGroupItem
-                value="female"
-                id="gender-female"
-                className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
-              />
-              <Label htmlFor="gender-female" className="font-normal">
-                여
-              </Label>
-            </div>
-          </RadioGroup>
-        </div>
+				<div className="space-y-2">
+					<Label htmlFor="birthDate">생년월일 *</Label>
+					<Input
+						id="birthDate"
+						placeholder="예: 1995-03-15 또는 950315"
+						value={birthDate}
+						onChange={(e) =>
+							handleBirthDateChange(e.target.value)
+						}
+						required
+						aria-invalid={!!birthDateError}
+						className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
+					/>
+					{birthDateError && (
+						<p className="text-sm text-red-400">
+							{birthDateError}
+						</p>
+					)}
+				</div>
+			</fieldset>
 
-        <div className="space-y-2">
-          <Label htmlFor="birthDate">생년월일 *</Label>
-          <Input
-            id="birthDate"
-            placeholder="예: 1995-03-15 또는 950315"
-            value={birthDate}
-            onChange={(e) => handleBirthDateChange(e.target.value)}
-            required
-            aria-invalid={!!birthDateError}
-            className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
-          />
-          {birthDateError && (
-            <p className="text-sm text-red-400">{birthDateError}</p>
-          )}
-        </div>
+			{/* 선택 항목 */}
+			<fieldset className="space-y-5">
+				<legend className="text-lg font-semibold">선택 항목</legend>
 
-      </fieldset>
+				<div className="space-y-2">
+					<Label htmlFor="nearestStation">
+						사는곳 (가까운 지하철역)
+					</Label>
+					<Input
+						id="nearestStation"
+						placeholder="가까운 지하철역"
+						value={nearestStation}
+						onChange={(e) => setNearestStation(e.target.value)}
+						maxLength={20}
+						className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
+					/>
+				</div>
 
-      {/* 선택 항목 */}
-      <fieldset className="space-y-5">
-        <legend className="text-lg font-semibold">선택 항목</legend>
+				<div className="space-y-3">
+					<Label>러닝경력</Label>
+					<RadioGroup
+						value={runningExperience}
+						onValueChange={setRunningExperience}
+					>
+						<div className="flex items-center gap-2">
+							<RadioGroupItem
+								value="런린이(입문 이하)"
+								id="exp-beginner"
+								className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
+							/>
+							<Label
+								htmlFor="exp-beginner"
+								className="font-normal"
+							>
+								런린이(입문 이하)
+							</Label>
+						</div>
+						<div className="flex items-center gap-2">
+							<RadioGroupItem
+								value="입문(5K 30분 이내)"
+								id="exp-entry"
+								className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
+							/>
+							<Label
+								htmlFor="exp-entry"
+								className="font-normal"
+							>
+								입문(5K 30분 이내)
+							</Label>
+						</div>
+						<div className="flex items-center gap-2">
+							<RadioGroupItem
+								value="초보 이상(10K 대회 경험)"
+								id="exp-intermediate"
+								className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
+							/>
+							<Label
+								htmlFor="exp-intermediate"
+								className="font-normal"
+							>
+								초보 이상(10K 대회 경험)
+							</Label>
+						</div>
+					</RadioGroup>
+				</div>
 
-        <div className="space-y-2">
-          <Label htmlFor="nearestStation">사는곳 (가까운 지하철역)</Label>
-          <Input
-            id="nearestStation"
-            placeholder="가까운 지하철역"
-            value={nearestStation}
-            onChange={(e) => setNearestStation(e.target.value)}
-            maxLength={20}
-            className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
-          />
-        </div>
+				<div className="space-y-2">
+					<Label htmlFor="phone">연락처</Label>
+					<Input
+						id="phone"
+						placeholder="추후 활동시 연락용"
+						value={phone}
+						onChange={(e) => setPhone(e.target.value)}
+						maxLength={20}
+						className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
+					/>
+				</div>
 
-        <div className="space-y-3">
-          <Label>러닝경력</Label>
-          <RadioGroup
-            value={runningExperience}
-            onValueChange={setRunningExperience}
-          >
-            <div className="flex items-center gap-2">
-              <RadioGroupItem
-                value="런린이(입문 이하)"
-                id="exp-beginner"
-                className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
-              />
-              <Label htmlFor="exp-beginner" className="font-normal">
-                런린이(입문 이하)
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <RadioGroupItem
-                value="입문(5K 30분 이내)"
-                id="exp-entry"
-                className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
-              />
-              <Label htmlFor="exp-entry" className="font-normal">
-                입문(5K 30분 이내)
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <RadioGroupItem
-                value="초보 이상(10K 대회 경험)"
-                id="exp-intermediate"
-                className="border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
-              />
-              <Label htmlFor="exp-intermediate" className="font-normal">
-                초보 이상(10K 대회 경험)
-              </Label>
-            </div>
-          </RadioGroup>
-        </div>
+				<div className="space-y-2">
+					<Label htmlFor="bankAccount">계좌번호</Label>
+					<Input
+						id="bankAccount"
+						placeholder="회비, 환급 처리용"
+						value={bankAccount}
+						onChange={(e) => setBankAccount(e.target.value)}
+						maxLength={50}
+						className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
+					/>
+				</div>
+			</fieldset>
 
-        <div className="space-y-2">
-          <Label htmlFor="phone">연락처</Label>
-          <Input
-            id="phone"
-            placeholder="추후 활동시 연락용"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            maxLength={20}
-            className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
-          />
-        </div>
+			{/* 개인정보 수집동의 */}
+			<fieldset className="space-y-4">
+				<legend className="text-lg font-semibold">
+					개인정보 수집동의
+				</legend>
+				<Textarea
+					readOnly
+					value={PRIVACY_TEXT}
+					rows={12}
+					className="border-white/20 bg-white/5 text-xs text-white/70 leading-relaxed"
+				/>
+				<div className="flex items-start gap-2">
+					<Checkbox
+						id="privacy"
+						checked={privacyAgreed}
+						onCheckedChange={(checked) =>
+							setPrivacyAgreed(checked === true)
+						}
+						className="mt-0.5 border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
+					/>
+					<Label
+						htmlFor="privacy"
+						className="font-normal leading-snug"
+					>
+						개인정보 수집 및 이용에 동의합니다. *
+					</Label>
+				</div>
+			</fieldset>
 
-        <div className="space-y-2">
-          <Label htmlFor="bankAccount">계좌번호</Label>
-          <Input
-            id="bankAccount"
-            placeholder="회비, 환급 처리용"
-            value={bankAccount}
-            onChange={(e) => setBankAccount(e.target.value)}
-            maxLength={50}
-            className="border-white/20 bg-white/5 text-white placeholder:text-white/40"
-          />
-        </div>
-      </fieldset>
-
-      {/* 개인정보 수집동의 */}
-      <fieldset className="space-y-4">
-        <legend className="text-lg font-semibold">개인정보 수집동의</legend>
-        <Textarea
-          readOnly
-          value={PRIVACY_TEXT}
-          rows={12}
-          className="border-white/20 bg-white/5 text-xs text-white/70 leading-relaxed"
-        />
-        <div className="flex items-start gap-2">
-          <Checkbox
-            id="privacy"
-            checked={privacyAgreed}
-            onCheckedChange={(checked) =>
-              setPrivacyAgreed(checked === true)
-            }
-            className="mt-0.5 border-white/40 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
-          />
-          <Label htmlFor="privacy" className="font-normal leading-snug">
-            개인정보 수집 및 이용에 동의합니다. *
-          </Label>
-        </div>
-      </fieldset>
-
-      <Button
-        type="submit"
-        disabled={!isValid || loading}
-        className="w-full bg-white text-black hover:bg-white/90 disabled:opacity-40"
-      >
-        {loading ? "제출 중..." : "제출하기"}
-      </Button>
-    </form>
-  );
+			<Button
+				type="submit"
+				disabled={!isValid || loading}
+				className="w-full bg-white text-black hover:bg-white/90 disabled:opacity-40"
+			>
+				{loading ? "제출 중..." : "제출하기"}
+			</Button>
+		</form>
+	);
 }
