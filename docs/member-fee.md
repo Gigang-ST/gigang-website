@@ -9,8 +9,8 @@
 
 ### 관리자 워크플로우
 1. 은행 입금 내역 확인
-2. Google Sheets `회비장부` 시트에 **이름 + 금액 + 날짜** 직접 입력
-3. Google Apps Script가 이름으로 `가입신청서`에서 `memberId`를 자동 매칭하여 기록
+2. Google Sheets `회비장부` 시트에 **이름 + 타입 + 금액 + 날짜** 직접 입력
+3. `Dues.js` (Apps Script)가 `member_name`으로 `가입신청서`에서 `member_id`를 자동 매칭하여 채움
 
 ### 회원 조회 기능 (웹)
 1. 이름 + 생년월일 입력 → 본인 인증
@@ -23,76 +23,55 @@
 
 ## 2. 데이터 모델
 
-### 2-1. 신규 시트: `회비장부`
+### 2-1. 기존 시트: `회비장부` (GID: 671485688)
+
+실제 컬럼 구조 (`google-apps-script/Code.js` 헤더 주석 기준):
 
 | 컬럼 인덱스 | 컬럼명 | 설명 | 예시 |
 |---|---|---|---|
-| 0 | `feeId` | 자동 생성 (`fee_N`) | `fee_1` |
-| 1 | `memberId` | Apps Script가 이름으로 매칭 | `mem_5` |
-| 2 | `memberName` | 관리자가 입력한 이름 | `홍길동` |
+| 0 | `member_id` | Dues.js가 이름으로 자동 매칭 | `mem_005` |
+| 1 | `member_name` | 관리자가 입력한 이름 | `홍길동` |
+| 2 | `type` | 납부 타입 | `월회비` |
 | 3 | `amount` | 입금액 (원) | `4000` |
-| 4 | `paymentDate` | 납부일 (`YYYY-MM-DD`) | `2025-03-15` |
+| 4 | `date` | 납부일 (`YYYY-MM-DD`) | `2025-03-15` |
 | 5 | `note` | 비고 | `2월+3월분` |
-| 6 | `createdAt` | 기록 생성 시각 | `2025-03-16T10:00:00` |
 
-> 관리자는 2~5번 컬럼만 입력. `feeId`, `memberId`, `createdAt`은 Apps Script 자동 처리.
+> 관리자는 1~5번 컬럼 입력. `member_id`는 `Dues.js`가 자동 채움.
+> `feeId`, `createdAt` 컬럼 없음 (기존 설계와 다름).
 
-### 2-2. `가입신청서` 시트 — `joinDate` 추가 노출
+### 2-2. `가입신청서` 시트 — `joinDate` 노출
 
-현재 `Member` 타입에 `createdAt`(인덱스 9)이 파싱되지 않음.
-`joinDate`로 추가 파싱 필요 (회비 계산의 기준일).
+실제 컬럼 구조 (`google-apps-script/Code.js` 헤더 주석 기준):
+
+| 컬럼 인덱스 | 컬럼명 |
+|---|---|
+| 0 | `member_id` |
+| 1 | `full_name` |
+| 2 | `gender` |
+| 3 | `birthday` |
+| 4 | `phone` |
+| 5 | `status` |
+| 6 | `account_number` |
+| 7 | `admin` |
+| **8** | **`joined_at`** ← 가입일 (회비 계산 기준) |
+| 9 | `created_at` |
+| 10 | `updated_at` |
+| 11 | `note` |
+
+> `joined_at`(인덱스 8)을 `Member.joinDate`로 파싱. (기존 `created_at` 인덱스 9 사용은 오류)
 
 ---
 
-## 3. Google Apps Script 변경
+## 3. Google Apps Script
 
-### 3-1. 신규 액션: `feePayment`
+### 3-1. 변경 없음 — `Dues.js`가 이미 처리
+- 관리자가 `회비장부` 시트에 `member_name` 입력 시 `Dues.js`가 `member_id` 자동 매칭
+- `doPost`에 `feePayment` 액션 추가 불필요
+- 웹 앱에서 회비를 직접 제출하는 기능 없음 (관리자 전용 시트 직접 입력)
 
-**요청 Payload:**
-```json
-{
-  "action": "feePayment",
-  "memberName": "홍길동",
-  "amount": 4000,
-  "paymentDate": "2025-03-15",
-  "note": "2월+3월분"
-}
-```
-
-**Apps Script 처리 로직:**
-```javascript
-case "feePayment": {
-  // 1. 가입신청서에서 이름으로 memberId 조회
-  const memberSheet = ss.getSheetByName("가입신청서");
-  const members = memberSheet.getDataRange().getValues();
-  let memberId = "";
-  for (let i = 1; i < members.length; i++) {
-    if (members[i][1] === data.memberName) {
-      memberId = members[i][0];
-      break;
-    }
-  }
-
-  // 2. 회비장부 시트에 기록 추가
-  const feeSheet = ss.getSheetByName("회비장부");
-  const nextId = "fee_" + feeSheet.getLastRow();
-  feeSheet.appendRow([
-    nextId,
-    memberId,       // 매칭된 memberId (없으면 빈 문자열)
-    data.memberName,
-    data.amount,
-    data.paymentDate,
-    data.note || "",
-    new Date().toISOString()
-  ]);
-  break;
-}
-```
-
-> 이름이 동명이인일 경우 첫 번째 활성 회원으로 매칭. 매칭 실패 시 `memberId`는 빈 문자열로 저장 (수동 수정).
-
-### 3-2. 파일 위치
-- `google-apps-script/Code.js` — `switch(action)` 블록에 case 추가
+### 3-2. `google-apps-script/Dues.js` 신규 파일 (로컬 관리)
+- 현재 Apps Script에 배포되어 있으나 로컬 `google-apps-script/` 디렉토리에 파일 없음
+- 소스 코드 동기화를 위해 `Dues.js` 파일 로컬에 추가 필요
 
 ---
 
@@ -106,20 +85,19 @@ export type Member = {
   gender: string;
   birthDate: string;
   status: string;
-  joinDate: string; // 추가: 가입일 (YYYY-MM-DD 또는 ISO 문자열)
+  joinDate: string; // 추가: joined_at (인덱스 8)
 };
 ```
 
 ### 4-2. 신규 타입: `FeeRecord`
 ```typescript
 export type FeeRecord = {
-  feeId: string;
   memberId: string;
   memberName: string;
+  type: string;
   amount: number;
-  paymentDate: string;
+  date: string;
   note: string;
-  createdAt: string;
 };
 ```
 
@@ -134,7 +112,7 @@ const GID_MAP: Record<string, string> = {
   participants: "573958893",
   members: "0",
   records: "1638315503",
-  fees: "671485688",  // 회비장부 시트
+  fees: "671485688",  // 회비장부
 };
 ```
 
@@ -144,8 +122,8 @@ const GID_MAP: Record<string, string> = {
 
 ### `fetchMembers()` 수정
 ```typescript
-// row[9] → joinDate 추가 파싱
-joinDate: row[9] ?? "",
+// row[8] → joinDate (joined_at) 추가 파싱
+joinDate: row[8] ?? "",
 ```
 
 ### `fetchFees()` 신규 추가
@@ -153,13 +131,12 @@ joinDate: row[9] ?? "",
 export async function fetchFees(): Promise<FeeRecord[]> {
   const rows = await fetchSheetCSV("fees");
   return rows.slice(1).map((row) => ({
-    feeId: row[0] ?? "",
-    memberId: row[1] ?? "",
-    memberName: row[2] ?? "",
+    memberId: row[0] ?? "",
+    memberName: row[1] ?? "",
+    type: row[2] ?? "",
     amount: Number(row[3]) || 0,
-    paymentDate: row[4] ?? "",
+    date: row[4] ?? "",
     note: row[5] ?? "",
-    createdAt: row[6] ?? "",
   }));
 }
 ```
@@ -267,34 +244,32 @@ navigation: {
 
 | 단계 | 작업 | 파일 |
 |---|---|---|
-| 1 | Google Sheets `회비장부` 시트 GID 확인 완료 (671485688) | — |
-| 2 | Apps Script에 `feePayment` 액션 추가 | `google-apps-script/Code.js` |
-| 3 | `FeeRecord` 타입 추가, `Member` 타입에 `joinDate` 추가 | `lib/types.ts` |
-| 4 | API Route 화이트리스트에 `fees` 추가 | `app/api/sheets/[sheet]/route.ts` |
-| 5 | `fetchFees()` 추가, `fetchMembers()` 수정 | `lib/sheets.ts` |
-| 6 | `calcExpectedFee()`, `calcFeeStatus()` 구현 | `lib/fee-utils.ts` |
-| 7 | `/fee` 페이지 및 `fee-lookup.tsx` 컴포넌트 구현 | `app/fee/`, `components/` |
-| 8 | 네비게이션에 회비 메뉴 추가 | `config.ts` |
-| 9 | 빌드 검증 | `pnpm typecheck && pnpm build` |
+| 1 | `Dues.js` 로컬 파일 생성 (소스 동기화) | `google-apps-script/Dues.js` |
+| 2 | `FeeRecord` 타입 추가, `Member` 타입에 `joinDate` 추가 | `lib/types.ts` |
+| 3 | API Route 화이트리스트에 `fees` 추가 | `app/api/sheets/[sheet]/route.ts` |
+| 4 | `fetchFees()` 추가, `fetchMembers()`에 `joinDate` 파싱 추가 | `lib/sheets.ts` |
+| 5 | `calcExpectedFee()`, `calcFeeStatus()` 구현 | `lib/fee-utils.ts` |
+| 6 | `/fee` 페이지 및 `fee-lookup.tsx` 컴포넌트 구현 | `app/fee/`, `components/` |
+| 7 | 네비게이션에 회비 메뉴 추가 | `config.ts` |
+| 8 | 빌드 검증 | `pnpm typecheck && pnpm build` |
 
 ---
 
 ## 11. 주의사항 및 엣지 케이스
 
 ### 동명이인
-- Apps Script 매칭 시 첫 번째 활성 회원으로 매칭
-- 매칭 실패 시 `memberId` 빈 문자열로 저장 → 관리자가 수동으로 수정
+- `Dues.js` 매칭 시 첫 번째 활성 회원으로 매칭
+- 매칭 실패 시 `member_id` 빈 문자열로 저장 → 관리자가 수동 수정
 - 웹 조회 시 `memberId` 기준으로 필터링하므로 미매칭 기록은 반영 안 됨
 
 ### 가입일 미기재
-- 가입신청서의 `createdAt`(인덱스 9)을 joinDate로 사용
-- 빈 값이면 예상 납부액을 0으로 처리 (안전한 기본값)
+- `joined_at`(인덱스 8)이 비어있으면 예상 납부액 0으로 처리 (안전한 기본값)
 
 ### 보안
 - 회비 조회는 이름 + 생년월일 인증 후에만 결과 표시
-- 민감한 금액 정보이므로 클라이언트 side에서 인증 후 표시 (현재 아키텍처와 동일)
+- 민감한 금액 정보이므로 클라이언트 사이드에서 인증 후 표시
 - `sanitizeText()`로 입력값 정제
 
 ### 월 계산 기준
 - 한국 시간(`Asia/Seoul`) 기준으로 현재 월 계산
-- 당월 1일 이후에 가입했더라도 해당 달은 면제 (달 단위 계산)
+- 당월 중 가입했더라도 해당 달은 면제 (달 단위 계산)
