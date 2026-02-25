@@ -50,8 +50,8 @@ function onDuesEdit(e) {
   var col = range.getColumn();
   var row = range.getRow();
 
-  // B열(2번째 컬럼) 편집 시에만 동작, 헤더(1행) 제외
-  if (col !== 2 || row <= 1) return;
+  // C열(3번째 컬럼, member_name) 편집 시에만 동작, 헤더(1행) 제외
+  if (col !== 3 || row <= 1) return;
 
   // A열이 이미 수동 입력되어 있으면 무시
   var cellA = sheet.getRange(row, 1);
