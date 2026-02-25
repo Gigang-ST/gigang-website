@@ -9,7 +9,7 @@
 
 ### 관리자 워크플로우
 1. 은행 입금 내역 확인
-2. Google Sheets `회비내역` 시트에 **이름 + 금액 + 날짜** 직접 입력
+2. Google Sheets `회비장부` 시트에 **이름 + 금액 + 날짜** 직접 입력
 3. Google Apps Script가 이름으로 `가입신청서`에서 `memberId`를 자동 매칭하여 기록
 
 ### 회원 조회 기능 (웹)
@@ -23,7 +23,7 @@
 
 ## 2. 데이터 모델
 
-### 2-1. 신규 시트: `회비내역`
+### 2-1. 신규 시트: `회비장부`
 
 | 컬럼 인덱스 | 컬럼명 | 설명 | 예시 |
 |---|---|---|---|
@@ -73,8 +73,8 @@ case "feePayment": {
     }
   }
 
-  // 2. 회비내역 시트에 기록 추가
-  const feeSheet = ss.getSheetByName("회비내역");
+  // 2. 회비장부 시트에 기록 추가
+  const feeSheet = ss.getSheetByName("회비장부");
   const nextId = "fee_" + feeSheet.getLastRow();
   feeSheet.appendRow([
     nextId,
@@ -127,18 +127,16 @@ export type FeeRecord = {
 
 ## 5. API Route 확장 (`app/api/sheets/[sheet]/route.ts`)
 
-`GID_MAP`에 회비내역 시트 추가:
+`GID_MAP`에 회비장부 시트 추가:
 ```typescript
 const GID_MAP: Record<string, string> = {
   races: "267782969",
   participants: "573958893",
   members: "0",
   records: "1638315503",
-  fees: "<회비내역 시트 GID>",  // 신규 추가
+  fees: "671485688",  // 회비장부 시트
 };
 ```
-
-> GID는 Google Sheets에서 `회비내역` 시트 생성 후 URL에서 확인.
 
 ---
 
@@ -227,7 +225,7 @@ components/fee-lookup.tsx     # 클라이언트 컴포넌트 (조회 폼 + 결�
               ↓
     가입신청서에서 본인 인증 (이름 + 생년월일 일치)
               ↓
-    회비내역 시트에서 해당 memberId 납부 내역 합산
+    회비장부 시트에서 해당 memberId 납부 내역 합산
               ↓
   ┌───────────────────────────────────┐
   │  홍길동님의 회비 현황             │
@@ -269,7 +267,7 @@ navigation: {
 
 | 단계 | 작업 | 파일 |
 |---|---|---|
-| 1 | Google Sheets에서 `회비내역` 시트 생성 및 GID 확인 | (수동) |
+| 1 | Google Sheets `회비장부` 시트 GID 확인 완료 (671485688) | — |
 | 2 | Apps Script에 `feePayment` 액션 추가 | `google-apps-script/Code.js` |
 | 3 | `FeeRecord` 타입 추가, `Member` 타입에 `joinDate` 추가 | `lib/types.ts` |
 | 4 | API Route 화이트리스트에 `fees` 추가 | `app/api/sheets/[sheet]/route.ts` |
