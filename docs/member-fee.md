@@ -68,9 +68,13 @@
 - `doPost`에 `feePayment` 액션 추가 불필요
 - 웹 앱에서 회비를 직접 제출하는 기능 없음 (관리자 전용 시트 직접 입력)
 
-### 3-2. `google-apps-script/Dues.js` 신규 파일 (로컬 관리)
-- 현재 Apps Script에 배포되어 있으나 로컬 `google-apps-script/` 디렉토리에 파일 없음
-- 소스 코드 동기화를 위해 `Dues.js` 파일 로컬에 추가 필요
+### 3-2. 로컬 파일 동기화 완료
+- `Dues.js`, `Utmb.js`, `MemberTitle.js`, `PersenalBest.js` 로컬 추가 완료
+
+### 3-3. ⚠️ Apps Script 편집기에 반영 필요
+- `Dues.js` 트리거 컬럼 수정: B열(2) → C열(3)
+- 원인: 회비장부 컬럼 순서 `member_id / date / member_name / ...` 에서 `member_name`이 C열(3번)
+- 로컬 `google-apps-script/Dues.js` 54번째 줄 수정 완료 → **Apps Script 편집기에도 동일하게 반영할 것**
 
 ---
 
