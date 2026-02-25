@@ -30,14 +30,13 @@
 | 컬럼 인덱스 | 컬럼명 | 설명 | 예시 |
 |---|---|---|---|
 | 0 | `member_id` | Dues.js가 이름으로 자동 매칭 | `mem_005` |
-| 1 | `member_name` | 관리자가 입력한 이름 | `홍길동` |
-| 2 | `type` | 납부 타입 | `월회비` |
+| 1 | `date` | 납부일 (`YYYY-MM-DD`) | `2025-03-15` |
+| 2 | `member_name` | 관리자가 입력한 이름 | `홍길동` |
 | 3 | `amount` | 입금액 (원) | `4000` |
-| 4 | `date` | 납부일 (`YYYY-MM-DD`) | `2025-03-15` |
+| 4 | `type` | 납부 타입 | `월회비` |
 | 5 | `note` | 비고 | `2월+3월분` |
 
 > 관리자는 1~5번 컬럼 입력. `member_id`는 `Dues.js`가 자동 채움.
-> `feeId`, `createdAt` 컬럼 없음 (기존 설계와 다름).
 
 ### 2-2. `가입신청서` 시트 — `joinDate` 노출
 
@@ -132,10 +131,10 @@ export async function fetchFees(): Promise<FeeRecord[]> {
   const rows = await fetchSheetCSV("fees");
   return rows.slice(1).map((row) => ({
     memberId: row[0] ?? "",
-    memberName: row[1] ?? "",
-    type: row[2] ?? "",
+    date: row[1] ?? "",
+    memberName: row[2] ?? "",
     amount: Number(row[3]) || 0,
-    date: row[4] ?? "",
+    type: row[4] ?? "",
     note: row[5] ?? "",
   }));
 }
