@@ -1,5 +1,5 @@
 import HeroSection from "@/components/hero-section";
-import JoinDialogButton from "@/components/join-dialog-button";
+import JoinDialogButton from "@/components/join/join-dialog-button";
 import { siteContent } from "@/config";
 
 const { intro, highlights, meetingPlaces, rules, requests, contact } =

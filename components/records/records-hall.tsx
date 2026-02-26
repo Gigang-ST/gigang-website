@@ -59,6 +59,10 @@ export default function RecordsHall() {
 		setRecords((prev) => [...prev, record]);
 	}, []);
 
+	const handleUtmbRegistered = useCallback(() => {
+		// TrailTab 자체적으로 데이터 새로고침
+	}, []);
+
 	if (loading) {
 		return (
 			<div className="flex items-center justify-center py-20">
@@ -96,11 +100,7 @@ export default function RecordsHall() {
 			</TabsContent>
 
 			<TabsContent value="trail">
-				<TrailTab
-					records={records}
-					members={members}
-					onRecordSubmitted={handleRecordSubmitted}
-				/>
+				<TrailTab members={members} onUtmbRegistered={handleUtmbRegistered} />
 			</TabsContent>
 
 			<TabsContent value="triathlon">

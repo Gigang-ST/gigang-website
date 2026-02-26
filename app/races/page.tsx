@@ -1,5 +1,5 @@
 import HeroSection from "@/components/hero-section";
-import RaceParticipation from "@/components/race-participation";
+import RaceParticipation from "@/components/races/race-participation";
 
 export default function RacesPage() {
   return (

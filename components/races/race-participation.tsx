@@ -12,8 +12,8 @@ import type {
 	Member,
 	ActivityLog,
 } from "@/api/types";
-import RaceCard from "@/components/race-card";
-import RaceSignupDialog from "@/components/race-signup-dialog";
+import RaceCard from "@/components/races/race-card";
+import RaceSignupDialog from "@/components/races/race-signup-dialog";
 
 /** "2024-08-17" 또는 "2026. 2. 22" → Date 객체 */
 function parseDate(str: string): Date {
