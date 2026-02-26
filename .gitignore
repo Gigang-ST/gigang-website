@@ -39,3 +39,5 @@ next-env.d.ts
 # claude code (로컬 전용)
 .claude/settings.local.json
 .claude.local.md
+
+google-service.json
