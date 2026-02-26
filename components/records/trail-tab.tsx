@@ -61,7 +61,7 @@ export default function TrailTab({ records, members, onRecordSubmitted }: Props)
                   <td className="py-2 pr-2 text-white/40">
                     {i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1}
                   </td>
-                  <td className="py-2 pr-3 font-medium">{r.memberName}</td>
+                  <td className="py-2 pr-3 font-medium whitespace-nowrap">{r.memberName}</td>
                   <td className="py-2 pr-3 font-mono font-bold">
                     {r.utmbIndex || "-"}
                   </td>

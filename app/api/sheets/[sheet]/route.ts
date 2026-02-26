@@ -7,6 +7,7 @@ const GID_MAP: Record<string, string> = {
   participants: "573958893",
   members: "0",
   records: "1638315503",
+  fees: "671485688",
 };
 
 export async function GET(

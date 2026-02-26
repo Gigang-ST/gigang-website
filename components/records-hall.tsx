@@ -69,7 +69,7 @@ export default function RecordsHall() {
     <Tabs defaultValue="marathon">
       <TabsList className="w-full">
         {MAIN_TABS.map((tab) => (
-          <TabsTrigger key={tab.value} value={tab.value} className="flex-1">
+          <TabsTrigger key={tab.value} value={tab.value} className="flex-1 whitespace-nowrap">
             {tab.label}
           </TabsTrigger>
         ))}

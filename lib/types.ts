@@ -27,6 +27,17 @@ export type Member = {
   gender: string;     // "male" | "female"
   birthDate: string;  // "1994-10-17"
   status: string;     // "active" | "inactive" | "banned"
+  joinDate: string;   // "2025-01-15" (joined_at, 인덱스 8)
+};
+
+/** 회비장부 시트 한 행 */
+export type FeeRecord = {
+  memberId: string;    // "mem_001"
+  date: string;        // "2025-03-15"
+  memberName: string;  // "홍길동"
+  amount: number;      // 4000
+  type: string;        // "월회비"
+  note: string;        // "2월+3월분"
 };
 
 /** 대회기록 시트 한 행 (15컬럼) */
