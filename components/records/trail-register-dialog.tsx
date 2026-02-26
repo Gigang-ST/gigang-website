@@ -13,14 +13,15 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { validateBirthDate, normalizeBirthDate } from "@/lib/validation";
 import { sanitizeText } from "@/lib/sanitize";
-import { createActivityLog } from "@/app/actions/activity-log";
-import type { ActivityLog, Member } from "@/api/types";
+import { createMemberUtmb } from "@/app/actions/member-utmb";
+import { getUtmbProfile } from "@/app/actions/utmb";
+import type { Member } from "@/api/types";
 
 type Props = {
 	members: Member[];
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	onSubmitted: (record: ActivityLog) => void;
+	onSubmitted: () => void;
 };
 
 type Step = "verify" | "slug-input" | "done";
@@ -105,20 +106,11 @@ export default function TrailRegisterDialog({
 		setUtmbData(null);
 
 		try {
-			const res = await fetch(
-				`/api/utmb/${encodeURIComponent(slug.trim())}`,
-			);
-			if (!res.ok) {
-				const body = await res.json().catch(() => null);
-				throw new Error(
-					body?.error || "UTMB 프로필을 찾을 수 없습니다.",
-				);
-			}
-			const data = await res.json();
+			const data = await getUtmbProfile(slug.trim());
 			setUtmbData({
-				name: data.name || "",
-				utmbIndex: data.utmbIndex ?? null,
-				recentRaces: data.recentRaces || [],
+				name: data.name,
+				utmbIndex: data.utmbIndex,
+				recentRaces: data.recentRaces,
 			});
 		} catch (err) {
 			setFetchError(
@@ -133,38 +125,23 @@ export default function TrailRegisterDialog({
 
 	// 등록
 	const handleSubmit = useCallback(async () => {
-		if (!verifiedMember) return;
+		if (!verifiedMember || !slug.trim()) return;
 		setSubmitting(true);
 
-		const competitionName = sanitizeText(
-			utmbData?.recentRaces?.[0]?.eventName || "",
-			100,
-		);
-
 		try {
-			const result = await createActivityLog({
+			await createMemberUtmb({
 				member_id: verifiedMember.id,
-				full_name: sanitizeText(name, 20),
-				activity_date: new Date().toISOString().split("T")[0],
-				activity_type: "trail_running",
-				distance_km: 0,
-				duration_sec: 0,
-				duration_hhmmss: sanitizeText(
-					utmbData?.recentRaces?.[0]?.time || "",
-					20,
-				),
-				event_name: `UTMB:${sanitizeText(slug, 100).replace(/[^a-zA-Z0-9._-]/g, "")}`,
-				competition_name: competitionName,
+				utmb_key: sanitizeText(slug, 100).replace(/[^a-zA-Z0-9._-]/g, ""),
 			});
 
-			onSubmitted(result);
+			onSubmitted();
 			setStep("done");
 		} catch {
 			alert("제출 중 오류가 발생했습니다. 다시 시도해주세요.");
 		} finally {
 			setSubmitting(false);
 		}
-	}, [name, slug, utmbData, verifiedMember, onSubmitted]);
+	}, [slug, verifiedMember, onSubmitted]);
 
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
