@@ -1,7 +1,7 @@
 import { parseCSV } from "./csv";
-import type { RaceInfo, RaceParticipant, Member, RaceRecord } from "./types";
+import type { RaceInfo, RaceParticipant, Member, RaceRecord, FeeRecord } from "./types";
 
-type SheetName = "races" | "participants" | "members" | "records";
+type SheetName = "races" | "participants" | "members" | "records" | "fees";
 
 const CACHE_TTL = 5 * 60 * 1000; // 5분
 
@@ -79,6 +79,19 @@ export async function fetchMembers(): Promise<Member[]> {
     gender: row[2] || "",
     birthDate: row[3] || "",
     status: row[5] || "",
+    joinDate: row[8] || "",
+  }));
+}
+
+export async function fetchFees(): Promise<FeeRecord[]> {
+  const rows = await fetchSheet("fees");
+  return rows.map((row) => ({
+    memberId: row[0] || "",
+    date: row[1] || "",
+    memberName: row[2] || "",
+    amount: Number(row[3]) || 0,
+    type: row[4] || "",
+    note: row[5] || "",
   }));
 }
 
