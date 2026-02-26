@@ -75,24 +75,9 @@ export type PersonalBest = {
 	updated_at: string;
 };
 
-export type MemberTitle = {
-	id: string;
+export type MemberUtmb = {
 	member_id: string;
-	full_name: string;
-	title_group: string;
-	title_name: string;
-	assigned_by: string;
-	source_ref_id?: string;
-	assigned_at: string;
-};
-
-export type TitleDefinition = {
-	id: string;
-	title_group: string;
-	title_name: string;
-	criteria_text: string;
-	criteria_type: string;
-	priority: number;
+	utmb_key: string;
 };
 
 // ──────────────────────────────────────────────
@@ -135,6 +120,11 @@ export type ActivityLogCreate = {
 	competition_name?: string;
 	competition_class?: string;
 	elevation_gain_m?: number;
+};
+
+export type MemberUtmbCreate = {
+	member_id: string;
+	utmb_key: string;
 };
 
 // ──────────────────────────────────────────────

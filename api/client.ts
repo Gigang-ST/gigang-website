@@ -7,6 +7,8 @@ import type {
 	ActivityLog,
 	ActivityLogCreate,
 	PersonalBest,
+	MemberUtmb,
+	MemberUtmbCreate,
 } from "./types";
 
 const GAS_API_URL = process.env.GAS_API_URL;
@@ -19,6 +21,7 @@ type ItemResponse<T> = { data: T; message?: string };
 async function gasGet<T>(
 	table: string,
 	params?: QueryParams,
+	options?: { noCache?: boolean },
 ): Promise<ListResponse<T>> {
 	if (!GAS_API_URL) {
 		throw new Error("GAS_API_URL environment variable is not configured");
@@ -37,9 +40,11 @@ async function gasGet<T>(
 	const requestUrl = url.toString();
 	console.log(`[GAS GET] ${requestUrl}`);
 
-	const res = await fetch(requestUrl, {
-		next: { revalidate: 300 },
-	});
+	const res = await fetch(requestUrl,
+		options?.noCache
+			? { cache: "no-store" }
+			: { next: { revalidate: 300 } },
+	);
 
 	console.log(`[GAS GET] status=${res.status} redirected=${res.redirected} url=${res.url}`);
 
@@ -52,6 +57,12 @@ async function gasGet<T>(
 
 	const json = await res.json();
 	console.log(`[GAS GET] OK — count=${json.count ?? "n/a"}, data keys=${Object.keys(json)}`);
+
+	// GAS API는 200 상태로 에러를 반환할 수 있음
+	if (json.error) {
+		throw new Error(json.error);
+	}
+
 	return json;
 }
 
@@ -91,7 +102,12 @@ async function gasGetById<T>(
 		throw new Error(parsed.error || `API error: ${res.status} — ${raw.slice(0, 200)}`);
 	}
 
-	return res.json();
+	const json = await res.json();
+	if (json.error) {
+		throw new Error(json.error);
+	}
+
+	return json;
 }
 
 async function gasCreate<T>(
@@ -123,7 +139,12 @@ async function gasCreate<T>(
 		throw new Error(parsed.error || `API error: ${res.status} — ${raw.slice(0, 200)}`);
 	}
 
-	return res.json();
+	const json = await res.json();
+	if (json.error) {
+		throw new Error(json.error);
+	}
+
+	return json;
 }
 
 async function gasPatch<T>(
@@ -158,7 +179,12 @@ async function gasPatch<T>(
 		throw new Error(parsed.error || `API error: ${res.status} — ${raw.slice(0, 200)}`);
 	}
 
-	return res.json();
+	const json = await res.json();
+	if (json.error) {
+		throw new Error(json.error);
+	}
+
+	return json;
 }
 
 // ── Member ──
@@ -216,4 +242,18 @@ export async function patchActivityLog(
 
 export async function listPersonalBests(params?: QueryParams) {
 	return gasGet<PersonalBest>("personal_best", params);
+}
+
+// ── MemberUtmb ──
+
+export async function listMemberUtmbs(params?: QueryParams) {
+	return gasGet<MemberUtmb>("member_utmb", params, { noCache: true });
+}
+
+export async function getMemberUtmb(memberId: string) {
+	return gasGetById<MemberUtmb>("member_utmb", memberId);
+}
+
+export async function createMemberUtmb(data: MemberUtmbCreate) {
+	return gasCreate<MemberUtmb>("member_utmb", data);
 }
