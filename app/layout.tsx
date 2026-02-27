@@ -34,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${pretendard.className} antialiased`}>
+      <body suppressHydrationWarning className={`${pretendard.className} antialiased`}>
         {children}
         <Analytics />
       </body>
