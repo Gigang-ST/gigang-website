@@ -42,7 +42,6 @@
     "eslint": "^9.39.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "googleapis": "^171.4.0",
     "postcss": "^8.5",
     "sharp": "^0.33.5",
     "tailwindcss": "^4.1.18",

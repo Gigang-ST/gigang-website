@@ -66,50 +66,6 @@ async function gasGet<T>(
 	return json;
 }
 
-async function gasGetById<T>(
-	table: string,
-	id: string,
-	params?: QueryParams,
-): Promise<ItemResponse<T>> {
-	if (!GAS_API_URL) {
-		throw new Error("GAS_API_URL environment variable is not configured");
-	}
-
-	const url = new URL(GAS_API_URL);
-	url.searchParams.set("table", table);
-	url.searchParams.set("id", id);
-	if (params) {
-		for (const [key, value] of Object.entries(params)) {
-			if (value !== undefined) {
-				url.searchParams.set(key, String(value));
-			}
-		}
-	}
-
-	const requestUrl = url.toString();
-	console.log(`[GAS GET_BY_ID] ${requestUrl}`);
-
-	const res = await fetch(requestUrl, {
-		next: { revalidate: 300 },
-	});
-
-	console.log(`[GAS GET_BY_ID] status=${res.status} redirected=${res.redirected} url=${res.url}`);
-
-	if (!res.ok) {
-		const raw = await res.text().catch(() => "");
-		console.error(`[GAS GET_BY_ID] error response body:\n${raw}`);
-		const parsed = (() => { try { return JSON.parse(raw); } catch { return {}; } })();
-		throw new Error(parsed.error || `API error: ${res.status} — ${raw.slice(0, 200)}`);
-	}
-
-	const json = await res.json();
-	if (json.error) {
-		throw new Error(json.error);
-	}
-
-	return json;
-}
-
 async function gasCreate<T>(
 	table: string,
 	data: unknown,
@@ -147,54 +103,10 @@ async function gasCreate<T>(
 	return json;
 }
 
-async function gasPatch<T>(
-	table: string,
-	id: string,
-	data: unknown,
-): Promise<ItemResponse<T>> {
-	if (!GAS_API_URL) {
-		throw new Error("GAS_API_URL environment variable is not configured");
-	}
-
-	const url = new URL(GAS_API_URL);
-	url.searchParams.set("table", table);
-	url.searchParams.set("id", id);
-	url.searchParams.set("_method", "PATCH");
-
-	const requestUrl = url.toString();
-	console.log(`[GAS PATCH] ${requestUrl}`, JSON.stringify(data));
-
-	const res = await fetch(requestUrl, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(data),
-	});
-
-	console.log(`[GAS PATCH] status=${res.status} redirected=${res.redirected} url=${res.url}`);
-
-	if (!res.ok) {
-		const raw = await res.text().catch(() => "");
-		console.error(`[GAS PATCH] error response body:\n${raw}`);
-		const parsed = (() => { try { return JSON.parse(raw); } catch { return {}; } })();
-		throw new Error(parsed.error || `API error: ${res.status} — ${raw.slice(0, 200)}`);
-	}
-
-	const json = await res.json();
-	if (json.error) {
-		throw new Error(json.error);
-	}
-
-	return json;
-}
-
 // ── Member ──
 
 export async function listMembers(params?: QueryParams) {
 	return gasGet<Member>("member", params);
-}
-
-export async function getMember(id: string) {
-	return gasGetById<Member>("member", id);
 }
 
 export async function createMember(data: MemberCreate) {
@@ -205,10 +117,6 @@ export async function createMember(data: MemberCreate) {
 
 export async function listCompetitions(params?: QueryParams) {
 	return gasGet<Competition>("competition", params);
-}
-
-export async function getCompetition(id: string) {
-	return gasGetById<Competition>("competition", id);
 }
 
 // ── CompApplication ──
@@ -231,13 +139,6 @@ export async function createActivityLog(data: ActivityLogCreate) {
 	return gasCreate<ActivityLog>("activity_log", data);
 }
 
-export async function patchActivityLog(
-	id: string,
-	data: Partial<ActivityLog>,
-) {
-	return gasPatch<ActivityLog>("activity_log", id, data);
-}
-
 // ── PersonalBest ──
 
 export async function listPersonalBests(params?: QueryParams) {
@@ -248,10 +149,6 @@ export async function listPersonalBests(params?: QueryParams) {
 
 export async function listMemberUtmbs(params?: QueryParams) {
 	return gasGet<MemberUtmb>("member_utmb", params, { noCache: true });
-}
-
-export async function getMemberUtmb(memberId: string) {
-	return gasGetById<MemberUtmb>("member_utmb", memberId);
 }
 
 export async function createMemberUtmb(data: MemberUtmbCreate) {
