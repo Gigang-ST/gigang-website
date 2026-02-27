@@ -10,7 +10,6 @@ import TrailRegisterDialog from "./trail-register-dialog";
 
 type Props = {
 	members: Member[];
-	onUtmbRegistered: () => void;
 };
 
 type TrailRunner = {
@@ -24,7 +23,7 @@ type TrailRunner = {
 	index100m: number | null;
 };
 
-export default function TrailTab({ members, onUtmbRegistered }: Props) {
+export default function TrailTab({ members }: Props) {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [runners, setRunners] = useState<TrailRunner[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -94,8 +93,6 @@ export default function TrailTab({ members, onUtmbRegistered }: Props) {
 	}, [members]);
 
 	const handleRegistered = () => {
-		onUtmbRegistered();
-		// 데이터 새로고침
 		setLoading(true);
 		setTimeout(() => window.location.reload(), 1000);
 	};

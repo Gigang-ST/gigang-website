@@ -10,7 +10,6 @@ type Props = {
 	personalBests: PersonalBest[];
 	members: Member[];
 	competitions: Competition[];
-	records: ActivityLog[];
 	onRecordSubmitted: (record: ActivityLog) => void;
 };
 
@@ -100,7 +99,6 @@ export default function MarathonTab({
 	personalBests,
 	members,
 	competitions,
-	records,
 	onRecordSubmitted,
 }: Props) {
 	const [dialogOpen, setDialogOpen] = useState(false);
