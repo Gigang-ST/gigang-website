@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import JoinForm from "@/components/join-form";
+import JoinForm from "@/components/join/join-form";
 
 export default function JoinDialogButton() {
   const [open, setOpen] = useState(false);

@@ -1,5 +1,5 @@
 import HeroSection from "@/components/hero-section";
-import RecordsHall from "@/components/records-hall";
+import RecordsHall from "@/components/records/records-hall";
 
 export default function RecordsPage() {
   return (

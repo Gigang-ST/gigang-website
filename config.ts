@@ -108,7 +108,6 @@ export const siteContent: SiteContent = {
       { label: "회칙", href: "/rules" },
       { label: "대회참여", href: "/races" },
       { label: "기강의전당", href: "/records" },
-      { label: "회비", href: "/fee" },
       { label: "가입안내", href: "/join" },
       {
         label: "소모임",
@@ -238,20 +237,6 @@ export const siteContent: SiteContent = {
       },
       {
         id: 5,
-        title: "회비",
-        details: [
-          "회비는 월 2천원입니다.",
-          "회비 사용목적",
-          "1) 크루 운영비용 (소모임 프리미엄, 크루 현수막 등)",
-          "2) 런닝 동기부여",
-          "3) 크루활동 참여독려",
-          "4) 이벤트",
-          "웬만하면 남기는거없이 그때그때 다 쓰는게 목표입니다.",
-          "6천원 이상 미납시 1일 안내 15일 추방될 수 있습니다.",
-        ],
-      },
-      {
-        id: 6,
         title: "기타",
         details: [
           "지각시 스쿼트 50회 연속지각시 +10 누적",
